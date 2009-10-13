@@ -1,11 +1,9 @@
 package Parse::AMQP::ProtocolDefinitions::Constant;
 
-use Any::Moose;
-
-has name => (
-  isa => 'Str',
-  is  => 'rw',
-);
+use Moose;
+with
+  'Parse::AMQP::ProtocolDefinitions::Roles::NameAsID',
+  'Parse::AMQP::ProtocolDefinitions::Roles::HasDocumentation';
 
 has value => (
   isa => 'Int',
@@ -17,12 +15,7 @@ has class => (
   is  => 'rw',
 );
 
-has doc => (
-  isa => 'Str',
-  is  => 'rw',
-);
-
-no Any::Moose;
+no Moose;
 __PACKAGE__->meta->make_immutable;
 
 ##############################

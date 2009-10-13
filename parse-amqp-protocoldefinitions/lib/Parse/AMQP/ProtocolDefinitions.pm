@@ -1,6 +1,6 @@
 package Parse::AMQP::ProtocolDefinitions;
 
-use Any::Moose;
+use Moose;
 use Carp::Clan qw(^Parse::AMQP::ProtocolDefinitions);
 use XML::LibXML;
 
@@ -32,7 +32,7 @@ has constants => (
   default => sub { {} },
 );
 
-no Any::Moose;
+no Moose;
 __PACKAGE__->meta->make_immutable;
 
 ###################################
