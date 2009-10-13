@@ -9,6 +9,19 @@ has doc => (
 
 sub type { return (split(/::/, shift))[-1] }
 
+around parse => sub {
+  my $orig = shift;
+  my ($class, $elem) = @_;
+  
+  my $self = $orig->(@_);
+  
+  if (my $doc = $elem->getChildrenByTagName('doc')) {
+    my $value = $elem->textContent;
+    $self->doc($value) if defined $value;
+  }
+  
+  return $self;
+};
 
 no Moose::Role;
 

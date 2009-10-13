@@ -30,11 +30,6 @@ sub parse {
     $self->$attr($value) if defined $value;
   }
 
-  if (my $doc = $elem->getChildrenByTagName('doc')) {
-    my $value = $elem->textContent;
-    $self->doc($value) if defined $value;
-  }
-  
   return $self;
 }
 
