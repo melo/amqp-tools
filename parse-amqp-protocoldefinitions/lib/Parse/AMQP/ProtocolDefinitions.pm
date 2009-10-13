@@ -29,11 +29,14 @@ __PACKAGE__->meta->make_immutable;
 ###################################
 
 sub parse {
-  my ($self, $xml) = @_;
-
+  my ($class, $xml) = @_;
+  
+  my $self = $class->new;
   my $doc = XML::LibXML->load_xml(location => $xml);
 
   $self->_extract_metadata($doc);
+  
+  return $self;
 }
 
 
