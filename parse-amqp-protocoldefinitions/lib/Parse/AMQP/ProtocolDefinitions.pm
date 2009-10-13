@@ -1,6 +1,7 @@
 package Parse::AMQP::ProtocolDefinitions;
 
 use Any::Moose;
+use Carp::Clan qw(^Parse::AMQP::ProtocolDefinitions);
 use XML::LibXML;
 
 has major => (
@@ -53,5 +54,11 @@ sub _extract_metadata {
 
   return;
 }
+
+
+###################################
+
+sub _fatal { croak(join('', @_, ', ')) }
+
 
 1;
