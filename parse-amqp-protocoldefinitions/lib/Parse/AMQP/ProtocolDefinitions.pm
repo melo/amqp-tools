@@ -27,9 +27,15 @@ has port => (
 );
 
 has constants => (
-  isa => 'HashRef',
-  is  => 'ro',
+  isa     => 'HashRef',
+  is      => 'rw',
   default => sub { {} },
+);
+
+has class_constant => (
+  isa     => 'Str',
+  is      => 'ro',
+  default => 'Parse::AMQP::ProtocolDefinitions::Constant',
 );
 
 no Moose;
@@ -39,13 +45,13 @@ __PACKAGE__->meta->make_immutable;
 
 sub parse {
   my ($class, $xml) = @_;
-  
+
   my $self = $class->new;
   my $doc = XML::LibXML->load_xml(location => $xml);
 
   $self->_extract_metadata($doc);
-  $self->_extract_constants($doc);
-  
+  $self->constants($self->class_constant->parse_all($doc));
+
   return $self;
 }
 
@@ -61,22 +67,6 @@ sub _extract_metadata {
     $self->$attr($amqp->getAttribute($attr));
   }
 
-  return;
-}
-
-sub _extract_constants {
-  my ($self, $doc) = @_;
-  my $cs = $self->constants;
-  
-  for my $elem ($doc->findnodes('/amqp/constant')) {
-    my $c = Parse::AMQP::ProtocolDefinitions::Constant->parse($elem);
-
-    my $name = $c->name;
-    _fatal("Duplicate constant '$name'") if $cs->{$name};
-
-    $cs->{$name} = $c;
-  }
-  
   return;
 }
 
