@@ -18,8 +18,6 @@ sub doc {
   return $docs->{$type};
 }
 
-sub type_name { return (split(/::/, shift))[-1] }
-
 around parse => sub {
   my $orig = shift;
   my ($self, $elem) = @_;
