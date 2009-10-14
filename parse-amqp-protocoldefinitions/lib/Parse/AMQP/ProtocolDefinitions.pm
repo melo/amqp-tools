@@ -8,6 +8,8 @@ use Parse::AMQP::ProtocolDefinitions::Class;
 use Parse::AMQP::ProtocolDefinitions::Constant;
 use Parse::AMQP::ProtocolDefinitions::Domain;
 
+with 'Parse::AMQP::ProtocolDefinitions::Roles::HasValidAttrs';
+
 has major => (
   isa => 'Int',
   is  => 'rw',
@@ -69,17 +71,18 @@ __PACKAGE__->meta->make_immutable;
 
 ###################################
 
-sub parse {
+sub valid_attrs {qw(major minor revision port)}
+
+###################################
+
+sub load {
   my ($class, $xml) = @_;
 
   my $self = $class->new;
   my $doc = XML::LibXML->load_xml(location => $xml);
-  my ($amqp) = $doc->findnodes('/amqp');
+  my ($elem) = $doc->findnodes('/amqp');
 
-  $self->_extract_metadata($doc);
-  $self->constants($self->class_constant->parse_all($amqp));
-  $self->domains($self->class_domain->parse_all($amqp));
-  $self->classes($self->class_class->parse_all($amqp));
+  $self->parse($elem);
 
   return $self;
 }
@@ -87,22 +90,12 @@ sub parse {
 
 ###################################
 
-sub _extract_metadata {
-  my ($self, $doc) = @_;
+sub parse {
+  my ($self, $elem) = @_;
 
-  my ($amqp) = $doc->findnodes('/amqp');
-
-  for my $attr (qw( major minor revision port )) {
-    $self->$attr($amqp->getAttribute($attr));
-  }
-
-  return;
+  $self->constants($self->class_constant->parse_all($elem));
+  $self->domains($self->class_domain->parse_all($elem));
+  $self->classes($self->class_class->parse_all($elem));
 }
-
-
-###################################
-
-sub _fatal { croak(join('', @_, ', ')) }
-
 
 1;
