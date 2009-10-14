@@ -18,11 +18,8 @@ sub doc {
   return $docs->{$type};
 }
 
-around parse => sub {
-  my $orig = shift;
+after parse => sub {
   my ($self, $elem) = @_;
-
-  $orig->(@_);
 
   my $docs = $self->_docs;
   foreach my $doc ($elem->findnodes('doc')) {

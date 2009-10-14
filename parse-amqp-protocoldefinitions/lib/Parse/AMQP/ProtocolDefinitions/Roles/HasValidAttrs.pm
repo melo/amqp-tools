@@ -4,11 +4,8 @@ use Moose::Role;
 
 requires('valid_attrs');
 
-around parse => sub {
-  my $orig = shift;
+after parse => sub {
   my ($self, $elem) = @_;
-
-  $orig->(@_);
 
   for my $attr ($self->valid_attrs) {
     my $value = $elem->getAttribute($attr);
