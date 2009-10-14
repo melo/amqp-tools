@@ -14,7 +14,7 @@ sub parse_all {
     my $obj = $class->new;
     $obj->parse($elem);
     my $id = $obj->id;
-    _fatal("Duplicate '$class' with ID '$id'") if $all{$id};
+    confess("Duplicate '$class' with ID '$id'") if $all{$id};
 
     $all{$id} = $obj;
   }
