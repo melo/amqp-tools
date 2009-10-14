@@ -2,6 +2,7 @@ package Parse::AMQP::ProtocolDefinitions::Class;
 
 use Moose;
 use Parse::AMQP::ProtocolDefinitions::Chassis;
+use Parse::AMQP::ProtocolDefinitions::Method;
 
 with
   'Parse::AMQP::ProtocolDefinitions::Roles::ParseUnique',
@@ -31,6 +32,12 @@ has chassis => (
   default => sub { {} },
 );
 
+has methods => (
+  isa     => 'HashRef',
+  is      => 'rw',
+  default => sub { {} },
+);
+
 no Moose;
 __PACKAGE__->meta->make_immutable;
 
@@ -46,6 +53,7 @@ sub parse {
   my ($self, $elem) = @_;
 
   $self->chassis(Parse::AMQP::ProtocolDefinitions::Chassis->parse_all($elem));
+  $self->methods(Parse::AMQP::ProtocolDefinitions::Method->parse_all($elem));
 }
 
 1;

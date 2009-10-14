@@ -28,4 +28,22 @@ ok(exists $ch->{$_}) for (qw( client server ));
 isa_ok($_, 'Parse::AMQP::ProtocolDefinitions::Chassis') for values %$ch;
 is($ch->{$_}->implement, 'MUST') for (qw( client server ));
 
+my $cm = $c->methods;
+ok($ch);
+is(ref($cs), 'HASH');
+is(scalar(keys %$cm), 6);
+ok(exists $cm->{$_})
+  for (qw( open open-ok close close-ok flow flow-ok ));
+isa_ok($_, 'Parse::AMQP::ProtocolDefinitions::Method')
+  for values %$cm;
+ok($cm->{$_}->synchronous, "method '$_' is synchronous")
+  for (qw( open open-ok close close-ok flow ));
+ok(!$cm->{'flow-ok'}->synchronous, "method 'flow-ok' is NOT synchronous");
+
+my $m = $cm->{open};
+ok($m);
+is($m->index, 10);
+is($m->label, 'open a channel for use');
+like($m->doc, qr/This method opens a channel to the server/);
+
 done_testing();
