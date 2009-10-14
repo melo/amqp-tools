@@ -8,7 +8,9 @@ use Parse::AMQP::ProtocolDefinitions::Class;
 use Parse::AMQP::ProtocolDefinitions::Constant;
 use Parse::AMQP::ProtocolDefinitions::Domain;
 
-with 'Parse::AMQP::ProtocolDefinitions::Roles::HasValidAttrs';
+with 
+   'Parse::AMQP::ProtocolDefinitions::Roles::Parse',
+   'Parse::AMQP::ProtocolDefinitions::Roles::HasValidAttrs';
 
 has major => (
   isa => 'Int',

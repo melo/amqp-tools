@@ -3,6 +3,7 @@ package Parse::AMQP::ProtocolDefinitions::Field;
 use Moose;
 
 with
+  'Parse::AMQP::ProtocolDefinitions::Roles::Parse',
   'Parse::AMQP::ProtocolDefinitions::Roles::ParseSequence',
   'Parse::AMQP::ProtocolDefinitions::Roles::HasDocumentation',
   'Parse::AMQP::ProtocolDefinitions::Roles::HasRules',

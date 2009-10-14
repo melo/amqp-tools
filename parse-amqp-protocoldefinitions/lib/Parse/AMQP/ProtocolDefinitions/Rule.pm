@@ -1,7 +1,9 @@
 package Parse::AMQP::ProtocolDefinitions::Rule;
 
 use Moose;
+
 with
+  'Parse::AMQP::ProtocolDefinitions::Roles::Parse',
   'Parse::AMQP::ProtocolDefinitions::Roles::ParseUnique',
   'Parse::AMQP::ProtocolDefinitions::Roles::HasNameAsID',
   'Parse::AMQP::ProtocolDefinitions::Roles::HasValidAttrs',

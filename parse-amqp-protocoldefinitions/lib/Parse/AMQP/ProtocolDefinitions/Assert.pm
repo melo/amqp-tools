@@ -4,6 +4,7 @@ use Moose;
 use Moose::Util::TypeConstraints;
 
 with
+  'Parse::AMQP::ProtocolDefinitions::Roles::Parse',
   'Parse::AMQP::ProtocolDefinitions::Roles::ParseSequence',
   'Parse::AMQP::ProtocolDefinitions::Roles::HasValidAttrs';
 

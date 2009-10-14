@@ -4,6 +4,7 @@ use Moose;
 use Parse::AMQP::ProtocolDefinitions::Method;
 
 with
+  'Parse::AMQP::ProtocolDefinitions::Roles::Parse',
   'Parse::AMQP::ProtocolDefinitions::Roles::ParseUnique',
   'Parse::AMQP::ProtocolDefinitions::Roles::HasNameAsID',
   'Parse::AMQP::ProtocolDefinitions::Roles::HasValidAttrs',

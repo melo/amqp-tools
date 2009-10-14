@@ -2,9 +2,7 @@ package Parse::AMQP::ProtocolDefinitions::Roles::ParseSequence;
 
 use Moose::Role;
 
-requires(qw( xpath_expr ));
-
-sub parse {}
+requires(qw( xpath_expr parse ));
 
 sub parse_all {
   my ($class, $doc) = @_;

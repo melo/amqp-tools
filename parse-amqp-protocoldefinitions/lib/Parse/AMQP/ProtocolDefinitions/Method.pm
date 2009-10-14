@@ -5,6 +5,7 @@ use Parse::AMQP::ProtocolDefinitions::Response;
 use Parse::AMQP::ProtocolDefinitions::Field;
 
 with
+  'Parse::AMQP::ProtocolDefinitions::Roles::Parse',
   'Parse::AMQP::ProtocolDefinitions::Roles::ParseUnique',
   'Parse::AMQP::ProtocolDefinitions::Roles::HasNameAsID',
   'Parse::AMQP::ProtocolDefinitions::Roles::HasValidAttrs',
