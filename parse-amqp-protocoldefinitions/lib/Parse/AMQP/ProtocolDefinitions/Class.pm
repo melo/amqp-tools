@@ -1,13 +1,13 @@
 package Parse::AMQP::ProtocolDefinitions::Class;
 
 use Moose;
-use Parse::AMQP::ProtocolDefinitions::Chassis;
 use Parse::AMQP::ProtocolDefinitions::Method;
 
 with
   'Parse::AMQP::ProtocolDefinitions::Roles::ParseUnique',
   'Parse::AMQP::ProtocolDefinitions::Roles::HasNameAsID',
   'Parse::AMQP::ProtocolDefinitions::Roles::HasValidAttrs',
+  'Parse::AMQP::ProtocolDefinitions::Roles::HasChassis',
   'Parse::AMQP::ProtocolDefinitions::Roles::HasDocumentation';
 
 
@@ -24,12 +24,6 @@ has index => (
 has label => (
   isa => 'Str',
   is  => 'rw',
-);
-
-has chassis => (
-  isa     => 'HashRef',
-  is      => 'rw',
-  default => sub { {} },
 );
 
 has methods => (
@@ -52,7 +46,6 @@ sub valid_attrs {qw(handler index label)}
 sub parse {
   my ($self, $elem) = @_;
 
-  $self->chassis(Parse::AMQP::ProtocolDefinitions::Chassis->parse_all($elem));
   $self->methods(Parse::AMQP::ProtocolDefinitions::Method->parse_all($elem));
 }
 
