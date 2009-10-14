@@ -2,7 +2,7 @@ package Parse::AMQP::ProtocolDefinitions::Roles::Parse;
 
 use Moose::Role;
 
-sub parse {}
+sub parse { }
 
 no Moose::Role;
 
