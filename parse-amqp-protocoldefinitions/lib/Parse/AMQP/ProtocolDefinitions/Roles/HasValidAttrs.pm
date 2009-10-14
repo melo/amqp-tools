@@ -8,8 +8,10 @@ after parse => sub {
   my ($self, $elem) = @_;
 
   for my $attr ($self->valid_attrs) {
+    my $slot = $attr;
+    $slot =~ s/-/_/g;
     my $value = $elem->getAttribute($attr);
-    $self->$attr($value) if defined $value;
+    $self->$slot($value) if defined $value;
   }
 };
 
