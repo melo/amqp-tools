@@ -61,10 +61,11 @@ sub parse {
 
   my $self = $class->new;
   my $doc = XML::LibXML->load_xml(location => $xml);
+  my ($amqp) = $doc->findnodes('/amqp');
 
   $self->_extract_metadata($doc);
-  $self->constants($self->class_constant->parse_all($doc));
-  $self->domains($self->class_domain->parse_all($doc));
+  $self->constants($self->class_constant->parse_all($amqp));
+  $self->domains($self->class_domain->parse_all($amqp));
 
   return $self;
 }

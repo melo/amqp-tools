@@ -40,7 +40,7 @@ __PACKAGE__->meta->make_immutable;
 
 ##############################
 
-sub xpath_expr  {'/amqp/domain'}
+sub xpath_expr  {'domain'}
 sub valid_attrs {qw( type label)}
 
 ##############################

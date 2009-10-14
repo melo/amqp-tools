@@ -25,7 +25,7 @@ __PACKAGE__->meta->make_immutable;
 
 ##############################
 
-sub xpath_expr  {'/amqp/constant'}
+sub xpath_expr  {'constant'}
 sub valid_attrs {qw(value class)}
 
 ##############################
