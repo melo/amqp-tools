@@ -1,7 +1,6 @@
 package Parse::AMQP::ProtocolDefinitions::Chassis;
 
 use Moose;
-use Moose::Util::TypeConstraints;
 
 with
   'Parse::AMQP::ProtocolDefinitions::Roles::Parse',
