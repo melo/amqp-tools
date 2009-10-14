@@ -4,7 +4,7 @@ use Moose::Role;
 
 requires(qw( id type_name xpath_expr ));
 
-sub parse { return shift->new }
+sub parse {}
 
 sub parse_all {
   my ($class, $doc) = @_;
@@ -12,7 +12,8 @@ sub parse_all {
   my %all;
   
   for my $elem ($doc->findnodes($class->xpath_expr)) {
-    my $obj = $class->parse($elem);    
+    my $obj = $class->new;
+    $obj->parse($elem);
     my $id = $obj->id;
     _fatal("Duplicate '$type' with ID '$id'") if $all{$id};
 

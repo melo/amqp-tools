@@ -6,15 +6,14 @@ requires('valid_attrs');
 
 around parse => sub {
   my $orig = shift;
-  my ($class, $elem) = @_;
-  my $self = $orig->(@_);
+  my ($self, $elem) = @_;
+
+  $orig->(@_);
 
   for my $attr ($self->valid_attrs) {
     my $value = $elem->getAttribute($attr);
     $self->$attr($value) if defined $value;
   }
-
-  return $self;
 };
 
 no Moose::Role;

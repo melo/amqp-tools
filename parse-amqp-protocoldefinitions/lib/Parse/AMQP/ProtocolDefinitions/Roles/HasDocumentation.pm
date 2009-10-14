@@ -22,9 +22,9 @@ sub type_name { return (split(/::/, shift))[-1] }
 
 around parse => sub {
   my $orig = shift;
-  my ($class, $elem) = @_;
+  my ($self, $elem) = @_;
 
-  my $self = $orig->(@_);
+  $orig->(@_);
 
   my $docs = $self->_docs;
   foreach my $doc ($elem->findnodes('doc')) {
@@ -34,8 +34,6 @@ around parse => sub {
 
     $docs->{$type} = $value;
   }
-  
-  return $self
 };
 
 no Moose::Role;
