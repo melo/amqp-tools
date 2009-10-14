@@ -22,7 +22,7 @@ like($c->doc('grammar'), qr/close-channel\s+= C:CLOSE S:CLOSE-OK/);
 
 my $ch = $c->chassis;
 ok($ch);
-is(ref($cs), 'HASH');
+is(ref($ch), 'HASH');
 is(scalar(keys %$ch), 2);
 ok(exists $ch->{$_}) for (qw( client server ));
 isa_ok($_, 'Parse::AMQP::ProtocolDefinitions::Chassis') for values %$ch;
