@@ -46,4 +46,14 @@ is($m->index, 10);
 is($m->label, 'open a channel for use');
 like($m->doc, qr/This method opens a channel to the server/);
 
+my $r = $m->rules;
+ok($r);
+is(scalar(keys %$r), 1);
+$r = $r->{state};
+isa_ok($r, 'Parse::AMQP::ProtocolDefinitions::Rule');
+is($r->name, 'state');
+is($r->on_failure, 'channel-error');
+like($r->doc, qr/The client MUST NOT use this method on an already/);
+like($r->doc('scenario'), qr/Client opens a channel and then reopens/);
+
 done_testing();

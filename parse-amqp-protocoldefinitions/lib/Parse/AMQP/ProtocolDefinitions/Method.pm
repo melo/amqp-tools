@@ -6,6 +6,7 @@ with
   'Parse::AMQP::ProtocolDefinitions::Roles::ParseUnique',
   'Parse::AMQP::ProtocolDefinitions::Roles::HasNameAsID',
   'Parse::AMQP::ProtocolDefinitions::Roles::HasValidAttrs',
+  'Parse::AMQP::ProtocolDefinitions::Roles::HasRules',
   'Parse::AMQP::ProtocolDefinitions::Roles::HasDocumentation';
 
 
