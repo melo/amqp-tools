@@ -4,6 +4,7 @@ use Moose;
 use Carp::Clan qw(^Parse::AMQP::ProtocolDefinitions);
 use XML::LibXML;
 
+use Parse::AMQP::ProtocolDefinitions::Class;
 use Parse::AMQP::ProtocolDefinitions::Constant;
 use Parse::AMQP::ProtocolDefinitions::Domain;
 
@@ -51,6 +52,18 @@ has class_domain => (
   default => 'Parse::AMQP::ProtocolDefinitions::Domain',
 );
 
+has classes => (
+  isa     => 'HashRef',
+  is      => 'rw',
+  default => sub { {} },
+);
+
+has class_class => (
+  isa     => 'Str',
+  is      => 'ro',
+  default => 'Parse::AMQP::ProtocolDefinitions::Class',
+);
+
 no Moose;
 __PACKAGE__->meta->make_immutable;
 
@@ -66,6 +79,7 @@ sub parse {
   $self->_extract_metadata($doc);
   $self->constants($self->class_constant->parse_all($amqp));
   $self->domains($self->class_domain->parse_all($amqp));
+  $self->classes($self->class_class->parse_all($amqp));
 
   return $self;
 }
