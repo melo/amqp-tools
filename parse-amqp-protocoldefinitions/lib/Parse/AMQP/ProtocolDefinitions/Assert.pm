@@ -7,7 +7,7 @@ with
   'Parse::AMQP::ProtocolDefinitions::Roles::ParseSequence',
   'Parse::AMQP::ProtocolDefinitions::Roles::HasValidAttrs';
 
-enum 'AssertCheck', qw( notnull length regexp le );
+enum 'AssertCheck', qw( notnull length regexp le ne );
 
 has check => (
   isa => 'AssertCheck',
