@@ -2,6 +2,7 @@ package Parse::AMQP::ProtocolDefinitions::Domain;
 
 use Moose;
 use Parse::AMQP::ProtocolDefinitions::Rule;
+use Parse::AMQP::ProtocolDefinitions::Assert;
 
 with
   'Parse::AMQP::ProtocolDefinitions::Roles::ParseUnique',
@@ -26,6 +27,12 @@ has rules => (
   default => sub { {} },
 );
 
+has assertions => (
+  isa     => 'ArrayRef',
+  is      => 'rw',
+  default => sub { [] },
+);
+
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
@@ -42,6 +49,7 @@ sub parse {
   my ($self, $elem) = @_;
 
   $self->rules(Parse::AMQP::ProtocolDefinitions::Rule->parse_all($elem));
+  $self->assertions(Parse::AMQP::ProtocolDefinitions::Assert->parse_all($elem));
 }
 
 1;
