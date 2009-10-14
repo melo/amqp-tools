@@ -12,7 +12,7 @@ has assertions => (
 after parse => sub {
   my ($self, $elem) = @_;
 
-  $self->assertions(Parse::AMQP::ProtocolDefinitions::Assert->parse_all($elem));
+  $self->assertions(Parse::AMQP::ProtocolDefinitions::Assert->parse_all($elem, parent => $self));
 };
 
 no Moose::Role;

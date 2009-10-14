@@ -4,6 +4,8 @@ use Moose;
 use Moose::Util::TypeConstraints;
 
 
+extends 'Parse::AMQP::ProtocolDefinitions::Base';
+
 enum 'AssertCheck', qw( notnull length regexp le ne );
 
 has check => (

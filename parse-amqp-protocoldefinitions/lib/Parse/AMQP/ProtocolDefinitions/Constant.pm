@@ -3,6 +3,8 @@ package Parse::AMQP::ProtocolDefinitions::Constant;
 use Moose;
 
 
+extends 'Parse::AMQP::ProtocolDefinitions::Base';
+
 has value => (
   isa => 'Int',
   is  => 'rw',

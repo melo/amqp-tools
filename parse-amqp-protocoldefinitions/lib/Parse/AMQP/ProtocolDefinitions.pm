@@ -95,9 +95,9 @@ sub load {
 sub parse {
   my ($self, $elem) = @_;
 
-  $self->constants($self->class_constant->parse_all($elem));
-  $self->domains($self->class_domain->parse_all($elem));
-  $self->classes($self->class_class->parse_all($elem));
+  $self->constants($self->class_constant->parse_all($elem, sys => $self));
+  $self->domains($self->class_domain->parse_all($elem, sys => $self));
+  $self->classes($self->class_class->parse_all($elem, sys => $self));
 }
 
 1;

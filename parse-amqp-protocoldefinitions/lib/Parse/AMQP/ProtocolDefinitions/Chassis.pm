@@ -3,6 +3,8 @@ package Parse::AMQP::ProtocolDefinitions::Chassis;
 use Moose;
 
 
+extends 'Parse::AMQP::ProtocolDefinitions::Base';
+
 has implement => (
   isa => 'Str',
   is  => 'rw',

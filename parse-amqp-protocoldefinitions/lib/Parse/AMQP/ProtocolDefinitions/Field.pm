@@ -3,6 +3,8 @@ package Parse::AMQP::ProtocolDefinitions::Field;
 use Moose;
 
 
+extends 'Parse::AMQP::ProtocolDefinitions::Base';
+
 has domain => (
   isa => 'Str',
   is  => 'rw',  

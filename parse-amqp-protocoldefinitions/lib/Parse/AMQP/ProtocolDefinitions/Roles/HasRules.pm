@@ -12,7 +12,7 @@ has rules => (
 after parse => sub {
   my ($self, $elem) = @_;
 
-  $self->rules(Parse::AMQP::ProtocolDefinitions::Rule->parse_all($elem));
+  $self->rules(Parse::AMQP::ProtocolDefinitions::Rule->parse_all($elem, parent => $self));
 };
 
 no Moose::Role;

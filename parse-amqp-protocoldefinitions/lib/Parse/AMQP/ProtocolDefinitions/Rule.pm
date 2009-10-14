@@ -2,6 +2,9 @@ package Parse::AMQP::ProtocolDefinitions::Rule;
 
 use Moose;
 
+
+extends 'Parse::AMQP::ProtocolDefinitions::Base';
+
 has on_failure => (
   isa => 'Str',
   is  => 'rw',

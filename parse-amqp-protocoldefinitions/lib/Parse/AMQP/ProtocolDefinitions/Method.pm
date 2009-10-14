@@ -5,6 +5,8 @@ use Parse::AMQP::ProtocolDefinitions::Response;
 use Parse::AMQP::ProtocolDefinitions::Field;
 
 
+extends 'Parse::AMQP::ProtocolDefinitions::Base';
+
 has synchronous => (
   isa => 'Bool',
   is  => 'rw',
@@ -56,9 +58,9 @@ sub parse {
   my ($self, $elem) = @_;
 
   $self->fields(
-    Parse::AMQP::ProtocolDefinitions::Field->parse_all($elem));
+    Parse::AMQP::ProtocolDefinitions::Field->parse_all($elem, parent => $self));
   $self->responses(
-    Parse::AMQP::ProtocolDefinitions::Response->parse_all($elem));
+    Parse::AMQP::ProtocolDefinitions::Response->parse_all($elem, parent => $self));
 }
 
 

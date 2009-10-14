@@ -19,46 +19,57 @@ is($c->index, 20);
 is($c->label, 'work with channels');
 like($c->doc, qr/channel class provides methods for a client to establish a channel/);
 like($c->doc('grammar'), qr/close-channel\s+= C:CLOSE S:CLOSE-OK/);
+ok(!defined $c->parent, "... no parent, I'm a top level dude");
+is($c->sys, $pd, '... and my sys is the proper one');
 
-my $ch = $c->chassis;
-ok($ch);
-is(ref($ch), 'HASH');
-is(scalar(keys %$ch), 2);
-ok(exists $ch->{$_}) for (qw( client server ));
-isa_ok($_, 'Parse::AMQP::ProtocolDefinitions::Chassis') for values %$ch;
-is($ch->{$_}->implement, 'MUST') for (qw( client server ));
+my $chs = $c->chassis;
+ok($chs);
+is(ref($chs), 'HASH');
+is(scalar(keys %$chs), 2);
+ok(exists $chs->{$_}) for (qw( client server ));
+for my $ch (values %$chs) {
+  isa_ok($ch, 'Parse::AMQP::ProtocolDefinitions::Chassis', 'Chassis is of proper type');
+  is($ch->implement, 'MUST', '... and it MUST be implemented');
+  is($ch->parent, $c, "... not a bastard, I like having a father");
+  is($ch->sys, $pd, '... but my sys is still the proper one');
+}
 
-my $cm = $c->methods;
-ok($ch);
-is(ref($cs), 'HASH');
-is(scalar(keys %$cm), 6);
-ok(exists $cm->{$_})
+my $cms = $c->methods;
+ok($cms);
+is(ref($cms), 'HASH');
+is(scalar(keys %$cms), 6);
+ok(exists $cms->{$_})
   for (qw( open open-ok close close-ok flow flow-ok ));
-isa_ok($_, 'Parse::AMQP::ProtocolDefinitions::Method')
-  for values %$cm;
-ok($cm->{$_}->synchronous, "method '$_' is synchronous")
+for my $cm (values %$cms) {
+  isa_ok($cm, 'Parse::AMQP::ProtocolDefinitions::Method', 'Method is of proper type');
+  is($cm->parent, $c, "... not a bastard, I like having a father");
+  is($cm->sys, $pd, '... but my sys is still the proper one');
+}
+ok($cms->{$_}->synchronous, "method '$_' is synchronous")
   for (qw( open open-ok close close-ok flow ));
-ok(!$cm->{'flow-ok'}->synchronous, "method 'flow-ok' is NOT synchronous");
+ok(!$cms->{'flow-ok'}->synchronous, "method 'flow-ok' is NOT synchronous");
 
-my $m = $cm->{open};
+my $m = $cms->{open};
 ok($m);
 is($m->index, 10);
 is($m->label, 'open a channel for use');
 like($m->doc, qr/This method opens a channel to the server/);
 
-my $r = $m->rules;
-ok($r);
-is(scalar(keys %$r), 1);
-$r = $r->{state};
+my $rs = $m->rules;
+ok($rs);
+is(scalar(keys %$rs), 1);
+my $r = $rs->{state};
 isa_ok($r, 'Parse::AMQP::ProtocolDefinitions::Rule');
 is($r->name, 'state');
 is($r->on_failure, 'channel-error');
 like($r->doc, qr/The client MUST NOT use this method on an already/);
 like($r->doc('scenario'), qr/Client opens a channel and then reopens/);
+is($r->parent, $m, "... not a bastard, I like having a father");
+is($r->sys, $pd, '... but my sys is still the proper one');
 
 for my $mn (qw( open open-ok close close-ok flow flow-ok )) {
-  $m = $cm->{$mn};
-  my $chs = $m->chassis;
+  $m = $cms->{$mn};
+  $chs = $m->chassis;
   ok($chs, "Got chassis for method $mn");
   is(ref($chs), 'HASH', '... proper type');
   
@@ -72,9 +83,11 @@ for my $mn (qw( open open-ok close close-ok flow flow-ok )) {
     my $ch = $chs->{$side};
     isa_ok($ch, 'Parse::AMQP::ProtocolDefinitions::Chassis', '... proper type $ch');
     is($ch->implement, 'MUST', '... and expected implement attr value');
+    is($ch->parent, $m, "... not a bastard, I like having a father");
+    is($ch->sys, $pd, '... but my sys is still the proper one');
   }
   
-  my $rs = $m->responses;
+  $rs = $m->responses;
   ok($rs);
   is(ref($rs), 'HASH');
   my ($r) = values %$rs;
@@ -83,6 +96,8 @@ for my $mn (qw( open open-ok close close-ok flow flow-ok )) {
     ok($r, "Method $mn has a response");
     isa_ok($r, 'Parse::AMQP::ProtocolDefinitions::Response', '... of the proper type');
     is($r->name, "${mn}-ok", '... and with the expected name (${mn}-ok)');
+    is($r->parent, $m, "... not a bastard, I like having a father");
+    is($r->sys, $pd, '... but my sys is still the proper one');
   }
   else {
     ok(!defined($r), '... and no response');
@@ -93,7 +108,7 @@ $c = $cs->{basic};
 ok($c, 'Got class basic');
 $m = $c->methods->{get};
 ok($m, '... and method get');
-my $rs = $m->responses;
+$rs = $m->responses;
 ok($rs, '... have method get responses');
 is(scalar(keys %$rs), 2, '... two responses, as expected');
 for my $rn (qw( get-ok get-empty )) {

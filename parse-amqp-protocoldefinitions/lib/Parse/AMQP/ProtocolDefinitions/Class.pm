@@ -4,6 +4,8 @@ use Moose;
 use Parse::AMQP::ProtocolDefinitions::Method;
 
 
+extends 'Parse::AMQP::ProtocolDefinitions::Base';
+
 has handler => (
   isa => 'Str',
   is  => 'rw',
@@ -47,7 +49,7 @@ sub valid_attrs {qw(handler index label)}
 sub parse {
   my ($self, $elem) = @_;
 
-  $self->methods(Parse::AMQP::ProtocolDefinitions::Method->parse_all($elem));
+  $self->methods(Parse::AMQP::ProtocolDefinitions::Method->parse_all($elem, parent => $self));
 }
 
 1;

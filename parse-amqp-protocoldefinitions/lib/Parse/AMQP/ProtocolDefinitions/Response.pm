@@ -2,6 +2,9 @@ package Parse::AMQP::ProtocolDefinitions::Response;
 
 use Moose;
 
+
+extends 'Parse::AMQP::ProtocolDefinitions::Base';
+
 with 'Parse::AMQP::ProtocolDefinitions::Roles::Parse';
 with
   'Parse::AMQP::ProtocolDefinitions::Roles::ParseUnique',
