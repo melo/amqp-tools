@@ -1,6 +1,8 @@
 package Parse::AMQP::ProtocolDefinitions::Class;
 
 use Moose;
+use Parse::AMQP::ProtocolDefinitions::Chassis;
+
 with
   'Parse::AMQP::ProtocolDefinitions::Roles::ParseUnique',
   'Parse::AMQP::ProtocolDefinitions::Roles::HasNameAsID',
@@ -23,6 +25,12 @@ has label => (
   is  => 'rw',
 );
 
+has chassis => (
+  isa     => 'HashRef',
+  is      => 'rw',
+  default => sub { {} },
+);
+
 no Moose;
 __PACKAGE__->meta->make_immutable;
 
@@ -34,5 +42,10 @@ sub valid_attrs {qw(handler index label)}
 
 ##############################
 
+sub parse {
+  my ($self, $elem) = @_;
+
+  $self->chassis(Parse::AMQP::ProtocolDefinitions::Chassis->parse_all($elem));
+}
 
 1;
