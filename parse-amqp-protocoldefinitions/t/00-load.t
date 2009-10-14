@@ -9,6 +9,8 @@ use_ok('Parse::AMQP::ProtocolDefinitions::Chassis');
 use_ok('Parse::AMQP::ProtocolDefinitions::Response');
 use_ok('Parse::AMQP::ProtocolDefinitions::Rule');
 
+use_ok('Parse::AMQP::ProtocolDefinitions::Field');
+
 use_ok('Parse::AMQP::ProtocolDefinitions::Method');
 
 use_ok('Parse::AMQP::ProtocolDefinitions::Class');

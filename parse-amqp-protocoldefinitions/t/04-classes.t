@@ -101,4 +101,30 @@ for my $rn (qw( get-ok get-empty )) {
   isa_ok($rs->{$rn}, 'Parse::AMQP::ProtocolDefinitions::Response', '...... and of the proper type');
 }
 
+my $fs = $m->fields;
+ok($fs, "Got fields for method basic.get");
+is(ref($fs), 'ARRAY', '... proper type for field set');
+is(scalar(@$fs), 3, '... correct (3) number of fields');
+isa_ok($_, 'Parse::AMQP::ProtocolDefinitions::Field', '... field '.$_->name)
+  for (@$fs);
+
+is($fs->[0]->name, 'reserved-1', 'Field reserved-1 with proper name');
+ok($fs->[0]->reserved, '... it is a reserved field');
+is($fs->[0]->type, 'short', '... of type short');
+ok(!$fs->[0]->domain, '... so without a domain');
+ok(!$fs->[0]->label, '... and without a label');
+
+is($fs->[1]->name, 'queue', 'Field queue with proper name');
+ok(!$fs->[1]->reserved, '... it is not a reserved field');
+is($fs->[1]->domain, 'queue-name', '... so with a domain, queue-name');
+ok(!$fs->[1]->label, '... but no label on this one');
+ok(!$fs->[1]->type, '... and no type');
+like($fs->[1]->doc, qr/Specifies the name of the queue to get a message from/, '... although we get docs');
+
+is($fs->[2]->name, 'no-ack', 'Field no-ack with proper name');
+ok(!$fs->[2]->reserved, '... it is not a reserved field');
+is($fs->[2]->domain, 'no-ack', '... so with a domain, no-ack');
+ok(!$fs->[2]->label, '... but no label for this one');
+ok(!$fs->[2]->type, '... and no type');
+
 done_testing();

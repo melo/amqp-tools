@@ -2,6 +2,7 @@ package Parse::AMQP::ProtocolDefinitions::Method;
 
 use Moose;
 use Parse::AMQP::ProtocolDefinitions::Response;
+use Parse::AMQP::ProtocolDefinitions::Field;
 
 with
   'Parse::AMQP::ProtocolDefinitions::Roles::ParseUnique',
@@ -33,6 +34,12 @@ has responses => (
   default => sub { {} },
 );
 
+has fields => (
+  isa     => 'ArrayRef',
+  is      => 'rw',
+  default => sub { [] },
+);
+
 no Moose;
 __PACKAGE__->meta->make_immutable;
 
@@ -47,6 +54,8 @@ sub valid_attrs {qw(synchronous index label)}
 sub parse {
   my ($self, $elem) = @_;
 
+  $self->fields(
+    Parse::AMQP::ProtocolDefinitions::Field->parse_all($elem));
   $self->responses(
     Parse::AMQP::ProtocolDefinitions::Response->parse_all($elem));
 }
