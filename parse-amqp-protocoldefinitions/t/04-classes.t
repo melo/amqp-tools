@@ -56,4 +56,22 @@ is($r->on_failure, 'channel-error');
 like($r->doc, qr/The client MUST NOT use this method on an already/);
 like($r->doc('scenario'), qr/Client opens a channel and then reopens/);
 
+for my $mn (qw( open open-ok close close-ok flow flow-ok )) {
+  my $chs = $cm->{$mn}->chassis;
+  ok($chs, "Got chassis for method $mn");
+  is(ref($chs), 'HASH', '... proper type');
+  
+  my @sides;
+  push @sides, 'client' unless $mn eq 'open';
+  push @sides, 'server' unless $mn eq 'open-ok';
+
+  is(scalar(keys %$chs), scalar(@sides), '... correct number of chasiss');
+  foreach my $side (@sides) {
+    ok(exists $chs->{$side}, "... on the correct side $side");
+    my $ch = $chs->{$side};
+    isa_ok($ch, 'Parse::AMQP::ProtocolDefinitions::Chassis', '... proper type $ch');
+    is($ch->implement, 'MUST', '... and expected implement attr value');
+  }
+}
+
 done_testing();
