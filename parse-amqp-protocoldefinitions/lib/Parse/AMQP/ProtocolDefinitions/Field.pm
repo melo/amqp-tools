@@ -2,14 +2,6 @@ package Parse::AMQP::ProtocolDefinitions::Field;
 
 use Moose;
 
-with
-  'Parse::AMQP::ProtocolDefinitions::Roles::Parse',
-  'Parse::AMQP::ProtocolDefinitions::Roles::ParseSequence',
-  'Parse::AMQP::ProtocolDefinitions::Roles::HasDocumentation',
-  'Parse::AMQP::ProtocolDefinitions::Roles::HasRules',
-  'Parse::AMQP::ProtocolDefinitions::Roles::HasAssertions',
-  'Parse::AMQP::ProtocolDefinitions::Roles::HasNameAsID',
-  'Parse::AMQP::ProtocolDefinitions::Roles::HasValidAttrs';
 
 has domain => (
   isa => 'Str',
@@ -32,6 +24,15 @@ has type => (
   isa => 'Str',
   is  => 'rw',  
 );
+
+with 'Parse::AMQP::ProtocolDefinitions::Roles::Parse';
+with
+  'Parse::AMQP::ProtocolDefinitions::Roles::ParseSequence',
+  'Parse::AMQP::ProtocolDefinitions::Roles::HasDocumentation',
+  'Parse::AMQP::ProtocolDefinitions::Roles::HasRules',
+  'Parse::AMQP::ProtocolDefinitions::Roles::HasAssertions',
+  'Parse::AMQP::ProtocolDefinitions::Roles::HasNameAsID',
+  'Parse::AMQP::ProtocolDefinitions::Roles::HasValidAttrs';
 
 no Moose;
 

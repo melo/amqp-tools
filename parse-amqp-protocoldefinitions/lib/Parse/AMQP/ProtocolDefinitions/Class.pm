@@ -3,14 +3,6 @@ package Parse::AMQP::ProtocolDefinitions::Class;
 use Moose;
 use Parse::AMQP::ProtocolDefinitions::Method;
 
-with
-  'Parse::AMQP::ProtocolDefinitions::Roles::Parse',
-  'Parse::AMQP::ProtocolDefinitions::Roles::ParseUnique',
-  'Parse::AMQP::ProtocolDefinitions::Roles::HasNameAsID',
-  'Parse::AMQP::ProtocolDefinitions::Roles::HasValidAttrs',
-  'Parse::AMQP::ProtocolDefinitions::Roles::HasChassis',
-  'Parse::AMQP::ProtocolDefinitions::Roles::HasDocumentation';
-
 
 has handler => (
   isa => 'Str',
@@ -32,6 +24,14 @@ has methods => (
   is      => 'rw',
   default => sub { {} },
 );
+
+with 'Parse::AMQP::ProtocolDefinitions::Roles::Parse';
+with
+  'Parse::AMQP::ProtocolDefinitions::Roles::ParseUnique',
+  'Parse::AMQP::ProtocolDefinitions::Roles::HasNameAsID',
+  'Parse::AMQP::ProtocolDefinitions::Roles::HasValidAttrs',
+  'Parse::AMQP::ProtocolDefinitions::Roles::HasChassis',
+  'Parse::AMQP::ProtocolDefinitions::Roles::HasDocumentation';
 
 no Moose;
 __PACKAGE__->meta->make_immutable;

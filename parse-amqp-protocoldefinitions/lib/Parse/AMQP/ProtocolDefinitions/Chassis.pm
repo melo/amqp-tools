@@ -2,16 +2,17 @@ package Parse::AMQP::ProtocolDefinitions::Chassis;
 
 use Moose;
 
-with
-  'Parse::AMQP::ProtocolDefinitions::Roles::Parse',
-  'Parse::AMQP::ProtocolDefinitions::Roles::ParseUnique',
-  'Parse::AMQP::ProtocolDefinitions::Roles::HasNameAsID',
-  'Parse::AMQP::ProtocolDefinitions::Roles::HasValidAttrs';
 
 has implement => (
   isa => 'Str',
   is  => 'rw',
 );
+
+with 'Parse::AMQP::ProtocolDefinitions::Roles::Parse';
+with
+  'Parse::AMQP::ProtocolDefinitions::Roles::ParseUnique',
+  'Parse::AMQP::ProtocolDefinitions::Roles::HasNameAsID',
+  'Parse::AMQP::ProtocolDefinitions::Roles::HasValidAttrs';
 
 no Moose;
 no Moose::Util::TypeConstraints;

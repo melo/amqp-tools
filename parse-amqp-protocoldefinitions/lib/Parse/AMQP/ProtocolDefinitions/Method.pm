@@ -4,15 +4,6 @@ use Moose;
 use Parse::AMQP::ProtocolDefinitions::Response;
 use Parse::AMQP::ProtocolDefinitions::Field;
 
-with
-  'Parse::AMQP::ProtocolDefinitions::Roles::Parse',
-  'Parse::AMQP::ProtocolDefinitions::Roles::ParseUnique',
-  'Parse::AMQP::ProtocolDefinitions::Roles::HasNameAsID',
-  'Parse::AMQP::ProtocolDefinitions::Roles::HasValidAttrs',
-  'Parse::AMQP::ProtocolDefinitions::Roles::HasRules',
-  'Parse::AMQP::ProtocolDefinitions::Roles::HasChassis',
-  'Parse::AMQP::ProtocolDefinitions::Roles::HasDocumentation';
-
 
 has synchronous => (
   isa => 'Bool',
@@ -40,6 +31,15 @@ has fields => (
   is      => 'rw',
   default => sub { [] },
 );
+
+with 'Parse::AMQP::ProtocolDefinitions::Roles::Parse';
+with
+  'Parse::AMQP::ProtocolDefinitions::Roles::ParseUnique',
+  'Parse::AMQP::ProtocolDefinitions::Roles::HasNameAsID',
+  'Parse::AMQP::ProtocolDefinitions::Roles::HasValidAttrs',
+  'Parse::AMQP::ProtocolDefinitions::Roles::HasRules',
+  'Parse::AMQP::ProtocolDefinitions::Roles::HasChassis',
+  'Parse::AMQP::ProtocolDefinitions::Roles::HasDocumentation';
 
 no Moose;
 __PACKAGE__->meta->make_immutable;

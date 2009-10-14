@@ -8,9 +8,6 @@ use Parse::AMQP::ProtocolDefinitions::Class;
 use Parse::AMQP::ProtocolDefinitions::Constant;
 use Parse::AMQP::ProtocolDefinitions::Domain;
 
-with 
-   'Parse::AMQP::ProtocolDefinitions::Roles::Parse',
-   'Parse::AMQP::ProtocolDefinitions::Roles::HasValidAttrs';
 
 has major => (
   isa => 'Int',
@@ -67,6 +64,9 @@ has class_class => (
   is      => 'ro',
   default => 'Parse::AMQP::ProtocolDefinitions::Class',
 );
+
+with 'Parse::AMQP::ProtocolDefinitions::Roles::Parse';
+with 'Parse::AMQP::ProtocolDefinitions::Roles::HasValidAttrs';
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
