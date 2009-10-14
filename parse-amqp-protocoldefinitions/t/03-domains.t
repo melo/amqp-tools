@@ -20,11 +20,17 @@ is($c->type, 'longlong');
 is($c->label, 'server-assigned delivery tag');
 like($c->doc, qr/The server-assigned and channel-specific delivery tag/);
 
+my $r = $c->rules;
+is(scalar(keys %$r), 2);
+ok($r->{'channel-local'});
+like($r->{'channel-local'}->doc, qr/a client MUST NOT receive a message on/);
+
 $c = $cs->{'class-id'};
 ok($c);
 is($c->name, 'class-id');
 is($c->type, 'short');
 ok(!defined($c->label));
 ok(!defined($c->doc));
+is(scalar(keys %{$c->rules}), 0);
 
 done_testing();
