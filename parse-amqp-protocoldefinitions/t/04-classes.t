@@ -57,7 +57,8 @@ like($r->doc, qr/The client MUST NOT use this method on an already/);
 like($r->doc('scenario'), qr/Client opens a channel and then reopens/);
 
 for my $mn (qw( open open-ok close close-ok flow flow-ok )) {
-  my $chs = $cm->{$mn}->chassis;
+  $m = $cm->{$mn};
+  my $chs = $m->chassis;
   ok($chs, "Got chassis for method $mn");
   is(ref($chs), 'HASH', '... proper type');
   
@@ -72,6 +73,32 @@ for my $mn (qw( open open-ok close close-ok flow flow-ok )) {
     isa_ok($ch, 'Parse::AMQP::ProtocolDefinitions::Chassis', '... proper type $ch');
     is($ch->implement, 'MUST', '... and expected implement attr value');
   }
+  
+  my $rs = $m->responses;
+  ok($rs);
+  is(ref($rs), 'HASH');
+  my ($r) = values %$rs;
+  if ($mn !~ /-ok$/) {
+    is(keys %$rs, 1);
+    ok($r, "Method $mn has a response");
+    isa_ok($r, 'Parse::AMQP::ProtocolDefinitions::Response', '... of the proper type');
+    is($r->name, "${mn}-ok", '... and with the expected name (${mn}-ok)');
+  }
+  else {
+    ok(!defined($r), '... and no response');
+  }
+}
+
+$c = $cs->{basic};
+ok($c, 'Got class basic');
+$m = $c->methods->{get};
+ok($m, '... and method get');
+my $rs = $m->responses;
+ok($rs, '... have method get responses');
+is(scalar(keys %$rs), 2, '... two responses, as expected');
+for my $rn (qw( get-ok get-empty )) {
+  ok(exists $rs->{$rn}, "...... the '$rn' response is here");
+  isa_ok($rs->{$rn}, 'Parse::AMQP::ProtocolDefinitions::Response', '...... and of the proper type');
 }
 
 done_testing();
