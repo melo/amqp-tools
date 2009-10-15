@@ -31,6 +31,8 @@ with
   'Parse::AMQP::ProtocolDefinitions::Roles::HasNameAsID',
   'Parse::AMQP::ProtocolDefinitions::Roles::HasValidAttrs',
   'Parse::AMQP::ProtocolDefinitions::Roles::HasChassis',
+  'Parse::AMQP::ProtocolDefinitions::Roles::HasRules',
+  'Parse::AMQP::ProtocolDefinitions::Roles::HasFields',
   'Parse::AMQP::ProtocolDefinitions::Roles::HasDocumentation';
 
 no Moose;

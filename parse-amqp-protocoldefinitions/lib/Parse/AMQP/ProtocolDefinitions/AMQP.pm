@@ -27,6 +27,11 @@ has port => (
   is  => 'rw',
 );
 
+has comment => (
+  isa => 'Str',
+  is  => 'rw',
+);
+
 has constants => (
   isa     => 'HashRef',
   is      => 'rw',
@@ -53,7 +58,7 @@ __PACKAGE__->meta->make_immutable;
 ###################################
 
 sub xpath_expr  {'amqp'}
-sub valid_attrs {qw(major minor revision port)}
+sub valid_attrs {qw(major minor revision port comment)}
 
 ###################################
 
