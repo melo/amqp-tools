@@ -6,8 +6,11 @@ use Test::More;
 use Test::Exception;
 
 require 't/tlib/load_specs.pl';
+my @specs = load_specs();
+plan skip_all => 'No active specs found in $ENV{AMQP_PROTO_DEFS_DIR}'
+  unless @specs;
 
-SPEC: for my $spec (load_specs()) {
+SPEC: for my $spec (@specs) {
   my $amqp;
   lives_ok sub {
     $amqp = Parse::AMQP::ProtocolDefinitions->load($spec->{path});
