@@ -6,11 +6,14 @@ use Test::More;
 use Test::Exception;
 use Test::LeakTrace;
 
-require 't/tlib/load_file.pl';
+require 't/tlib/load_specs.pl';
 
-no_leaks_ok {
-  my $pd = load_file()
-} 'no memory leaks detected';
+SPEC: for my $spec (load_specs()) {
+  no_leaks_ok {
+    my $amqp;
+    eval { $amqp = Parse::AMQP::ProtocolDefinitions->load($spec->{path}); };
+  }
+  "no memory leaks detected on spec $spec->{name} from '$spec->{path}'";
+}
 
-note('And we are done');
 done_testing();

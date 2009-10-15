@@ -5,12 +5,20 @@ use warnings;
 use Test::More;
 use Test::Exception;
 
-require 't/tlib/load_file.pl';
-my $pd; lives_ok sub { $pd = load_file() };
+require 't/tlib/load_specs.pl';
 
-is($pd->major,    0);
-is($pd->minor,    9);
-is($pd->revision, 1);
-is($pd->port,     5672);
+SPEC: for my $spec (load_specs()) {
+  my $amqp;
+  lives_ok sub {
+    $amqp = Parse::AMQP::ProtocolDefinitions->load($spec->{path});
+  }, "Loading spec $spec->{name} from '$spec->{path}'";
+  next SPEC unless $amqp;
+
+  is($amqp->major,    $spec->{major});
+  is($amqp->minor,    $spec->{minor});
+  is($amqp->revision, $spec->{revision});
+  is($amqp->port,     5672);
+  ok($amqp->comment);
+}
 
 done_testing();
