@@ -2,9 +2,10 @@ package Parse::AMQP::ProtocolDefinitions::Constant;
 
 use Moose;
 with
-  'Parse::AMQP::ProtocolDefinitions::Roles::NameAsID',
-  'Parse::AMQP::ProtocolDefinitions::Roles::HasDocumentation',
-  'Parse::AMQP::ProtocolDefinitions::Roles::ParseAllUnique';
+  'Parse::AMQP::ProtocolDefinitions::Roles::ParseUnique',
+  'Parse::AMQP::ProtocolDefinitions::Roles::HasNameAsID',
+  'Parse::AMQP::ProtocolDefinitions::Roles::HasValidAttrs',
+  'Parse::AMQP::ProtocolDefinitions::Roles::HasDocumentation';
 
 
 has value => (
@@ -24,21 +25,10 @@ __PACKAGE__->meta->make_immutable;
 
 ##############################
 
-sub xpath_expr {'/amqp/constant'}
+sub xpath_expr  {'/amqp/constant'}
+sub valid_attrs {qw(value class)}
 
 ##############################
 
-sub parse {
-  my ($class, $elem) = @_;
-
-  my $self = $class->new;
-
-  for my $attr (qw( name value class )) {
-    my $value = $elem->getAttribute($attr);
-    $self->$attr($value) if defined $value;
-  }
-
-  return $self;
-}
 
 1;

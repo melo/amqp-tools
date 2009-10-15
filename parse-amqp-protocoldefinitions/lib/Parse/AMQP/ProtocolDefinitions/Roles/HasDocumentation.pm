@@ -7,7 +7,7 @@ has doc => (
   is  => 'rw',
 );
 
-sub type { return (split(/::/, shift))[-1] }
+sub type_name { return (split(/::/, shift))[-1] }
 
 around parse => sub {
   my $orig = shift;
