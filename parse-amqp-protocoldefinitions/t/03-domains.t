@@ -19,16 +19,16 @@ is($c->name, 'delivery-tag');
 is($c->type, 'longlong');
 is($c->label, 'server-assigned delivery tag');
 like($c->doc, qr/The server-assigned and channel-specific delivery tag/);
-ok(!defined $c->parent, "... no parent, I'm a top level dude");
-is($c->sys, $pd, '... and my sys is the proper one');
+is($c->parent, $pd, "... not parentless, I like having a father");
+is($c->sys, 'Parse::AMQP::ProtocolDefinitions', '... but my sys is still the proper one');
 
 my $rs = $c->rules;
 is(scalar(keys %$rs), 2);
 my $r = $rs->{'channel-local'};
 ok($r);
 like($r->doc, qr/a client MUST NOT receive a message on/);
-is($r->parent, $c, "... not a bastard, I like having a father");
-is($r->sys, $pd, '... but my sys is still the proper one');
+is($r->parent, $c, "... not parentless, I like having a father");
+is($r->sys, $c->sys, '... but my sys is still the proper one');
 
 $c = $cs->{'class-id'};
 ok($c);
@@ -52,8 +52,8 @@ is($as->[0]->value, '127');
 is($as->[1]->check, 'regexp');
 is($as->[1]->value, '^[a-zA-Z0-9-_.:]*$');
 for my $aa (@$as) {
-  is($aa->parent, $c, "... not a bastard, I like having a father");
-  is($aa->sys, $pd, '... but my sys is still the proper one');
+  is($aa->parent, $c, "... not parentless, I like having a father");
+  is($aa->sys, $c->sys, '... but my sys is still the proper one');
 }
 
 done_testing();

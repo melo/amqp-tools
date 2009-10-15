@@ -2,7 +2,6 @@ package Parse::AMQP::ProtocolDefinitions::Domain;
 
 use Moose;
 
-
 extends 'Parse::AMQP::ProtocolDefinitions::Base';
 
 has type => (
@@ -15,7 +14,6 @@ has label => (
   is  => 'rw',
 );
 
-with 'Parse::AMQP::ProtocolDefinitions::Roles::Parse';
 with
   'Parse::AMQP::ProtocolDefinitions::Roles::ParseUnique',
   'Parse::AMQP::ProtocolDefinitions::Roles::HasNameAsID',

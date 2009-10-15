@@ -2,7 +2,6 @@ package Parse::AMQP::ProtocolDefinitions::Rule;
 
 use Moose;
 
-
 extends 'Parse::AMQP::ProtocolDefinitions::Base';
 
 has on_failure => (
@@ -10,7 +9,6 @@ has on_failure => (
   is  => 'rw',
 );
 
-with 'Parse::AMQP::ProtocolDefinitions::Roles::Parse';
 with
   'Parse::AMQP::ProtocolDefinitions::Roles::ParseUnique',
   'Parse::AMQP::ProtocolDefinitions::Roles::HasNameAsID',

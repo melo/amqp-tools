@@ -4,7 +4,6 @@ use Moose;
 use Parse::AMQP::ProtocolDefinitions::Response;
 use Parse::AMQP::ProtocolDefinitions::Field;
 
-
 extends 'Parse::AMQP::ProtocolDefinitions::Base';
 
 has synchronous => (
@@ -34,7 +33,6 @@ has fields => (
   default => sub { [] },
 );
 
-with 'Parse::AMQP::ProtocolDefinitions::Roles::Parse';
 with
   'Parse::AMQP::ProtocolDefinitions::Roles::ParseUnique',
   'Parse::AMQP::ProtocolDefinitions::Roles::HasNameAsID',
@@ -54,7 +52,7 @@ sub valid_attrs {qw(synchronous index label)}
 
 ##############################
 
-sub parse {
+sub extract_from {
   my ($self, $elem) = @_;
 
   $self->fields(

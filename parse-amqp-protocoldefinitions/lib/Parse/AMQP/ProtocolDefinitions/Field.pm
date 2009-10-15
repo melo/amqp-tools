@@ -2,7 +2,6 @@ package Parse::AMQP::ProtocolDefinitions::Field;
 
 use Moose;
 
-
 extends 'Parse::AMQP::ProtocolDefinitions::Base';
 
 has domain => (
@@ -27,7 +26,6 @@ has type => (
   is  => 'rw',  
 );
 
-with 'Parse::AMQP::ProtocolDefinitions::Roles::Parse';
 with
   'Parse::AMQP::ProtocolDefinitions::Roles::ParseSequence',
   'Parse::AMQP::ProtocolDefinitions::Roles::HasDocumentation',

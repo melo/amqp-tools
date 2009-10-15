@@ -3,10 +3,9 @@ package Parse::AMQP::ProtocolDefinitions::Base;
 use Moose;
 
 has sys => (
-  isa        => 'Parse::AMQP::ProtocolDefinitions',
+  isa        => 'Str',
   is         => 'ro',
   lazy_build => 1,
-  weak_ref   => 1,
 );
 
 has parent => (
@@ -15,6 +14,8 @@ has parent => (
   weak_ref => 1,
 );
 
+no Moose;
+__PACKAGE__->meta->make_immutable;
 
 ##############################
 
@@ -32,5 +33,25 @@ sub _build_sys {
   return $sys;
 }
 
+##############################
+
+sub xpath_expr {
+  confess('Subclass '
+      . (ref($_[0]) || $_[0])
+      . ' must implement xpath_expr() method, ');
+}
+
+sub parse {
+  my ($self, $elem) = @_;
+
+  $self->extract_from($elem);
+  $self->finalize($elem);
+
+  return $self;
+}
+
+sub extract_from { }
+
+sub finalize { }
 
 1;

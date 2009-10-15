@@ -9,7 +9,7 @@ has assertions => (
   default => sub { [] },
 );
 
-after parse => sub {
+after extract_from => sub {
   my ($self, $elem) = @_;
 
   $self->assertions(Parse::AMQP::ProtocolDefinitions::Assert->parse_all($elem, parent => $self));

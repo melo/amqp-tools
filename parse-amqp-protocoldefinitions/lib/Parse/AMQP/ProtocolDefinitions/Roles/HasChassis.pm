@@ -9,7 +9,7 @@ has chassis => (
   default => sub { {} },
 );
 
-after parse => sub {
+after extract_from => sub {
   my ($self, $elem) = @_;
 
   $self->chassis(Parse::AMQP::ProtocolDefinitions::Chassis->parse_all($elem, parent => $self));

@@ -16,6 +16,9 @@ use_ok('Parse::AMQP::ProtocolDefinitions::Method');
 use_ok('Parse::AMQP::ProtocolDefinitions::Class');
 use_ok('Parse::AMQP::ProtocolDefinitions::Constant');
 use_ok('Parse::AMQP::ProtocolDefinitions::Domain');
+
+use_ok('Parse::AMQP::ProtocolDefinitions::AMQP');
+
 use_ok('Parse::AMQP::ProtocolDefinitions');
 
 done_testing();

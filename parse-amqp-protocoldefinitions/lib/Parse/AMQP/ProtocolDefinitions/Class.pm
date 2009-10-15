@@ -3,7 +3,6 @@ package Parse::AMQP::ProtocolDefinitions::Class;
 use Moose;
 use Parse::AMQP::ProtocolDefinitions::Method;
 
-
 extends 'Parse::AMQP::ProtocolDefinitions::Base';
 
 has handler => (
@@ -27,7 +26,6 @@ has methods => (
   default => sub { {} },
 );
 
-with 'Parse::AMQP::ProtocolDefinitions::Roles::Parse';
 with
   'Parse::AMQP::ProtocolDefinitions::Roles::ParseUnique',
   'Parse::AMQP::ProtocolDefinitions::Roles::HasNameAsID',
@@ -46,7 +44,7 @@ sub valid_attrs {qw(handler index label)}
 
 ##############################
 
-sub parse {
+sub extract_from {
   my ($self, $elem) = @_;
 
   $self->methods(Parse::AMQP::ProtocolDefinitions::Method->parse_all($elem, parent => $self));

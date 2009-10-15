@@ -18,7 +18,7 @@ sub doc {
   return $docs->{$type};
 }
 
-after parse => sub {
+after extract_from => sub {
   my ($self, $elem) = @_;
 
   my $docs = $self->_docs;

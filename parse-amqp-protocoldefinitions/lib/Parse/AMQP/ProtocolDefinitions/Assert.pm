@@ -3,7 +3,6 @@ package Parse::AMQP::ProtocolDefinitions::Assert;
 use Moose;
 use Moose::Util::TypeConstraints;
 
-
 extends 'Parse::AMQP::ProtocolDefinitions::Base';
 
 enum 'AssertCheck', qw( notnull length regexp le ne );
@@ -30,7 +29,6 @@ has field => (
   is  => 'rw',
 );
 
-with 'Parse::AMQP::ProtocolDefinitions::Roles::Parse';
 with
   'Parse::AMQP::ProtocolDefinitions::Roles::ParseSequence',
   'Parse::AMQP::ProtocolDefinitions::Roles::HasValidAttrs';

@@ -4,7 +4,7 @@ use Moose::Role;
 
 requires('valid_attrs');
 
-after parse => sub {
+after extract_from => sub {
   my ($self, $elem) = @_;
 
   for my $attr ($self->valid_attrs) {

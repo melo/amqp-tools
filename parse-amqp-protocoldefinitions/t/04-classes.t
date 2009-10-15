@@ -19,8 +19,8 @@ is($c->index, 20);
 is($c->label, 'work with channels');
 like($c->doc, qr/channel class provides methods for a client to establish a channel/);
 like($c->doc('grammar'), qr/close-channel\s+= C:CLOSE S:CLOSE-OK/);
-ok(!defined $c->parent, "... no parent, I'm a top level dude");
-is($c->sys, $pd, '... and my sys is the proper one');
+is($c->parent, $pd, "... not parentless, I like having a father");
+is($c->sys, 'Parse::AMQP::ProtocolDefinitions', '... but my sys is still the proper one');
 
 my $chs = $c->chassis;
 ok($chs);
@@ -30,8 +30,8 @@ ok(exists $chs->{$_}) for (qw( client server ));
 for my $ch (values %$chs) {
   isa_ok($ch, 'Parse::AMQP::ProtocolDefinitions::Chassis', 'Chassis is of proper type');
   is($ch->implement, 'MUST', '... and it MUST be implemented');
-  is($ch->parent, $c, "... not a bastard, I like having a father");
-  is($ch->sys, $pd, '... but my sys is still the proper one');
+  is($ch->parent, $c, "... not parentless, I like having a father");
+  is($ch->sys, $c->sys, '... but my sys is still the proper one');
 }
 
 my $cms = $c->methods;
@@ -42,8 +42,8 @@ ok(exists $cms->{$_})
   for (qw( open open-ok close close-ok flow flow-ok ));
 for my $cm (values %$cms) {
   isa_ok($cm, 'Parse::AMQP::ProtocolDefinitions::Method', 'Method is of proper type');
-  is($cm->parent, $c, "... not a bastard, I like having a father");
-  is($cm->sys, $pd, '... but my sys is still the proper one');
+  is($cm->parent, $c, "... not parentless, I like having a father");
+  is($cm->sys, $c->sys, '... but my sys is still the proper one');
 }
 ok($cms->{$_}->synchronous, "method '$_' is synchronous")
   for (qw( open open-ok close close-ok flow ));
@@ -64,8 +64,8 @@ is($r->name, 'state');
 is($r->on_failure, 'channel-error');
 like($r->doc, qr/The client MUST NOT use this method on an already/);
 like($r->doc('scenario'), qr/Client opens a channel and then reopens/);
-is($r->parent, $m, "... not a bastard, I like having a father");
-is($r->sys, $pd, '... but my sys is still the proper one');
+is($r->parent, $m, "... not parentless, I like having a father");
+is($r->sys, $m->sys, '... but my sys is still the proper one');
 
 for my $mn (qw( open open-ok close close-ok flow flow-ok )) {
   $m = $cms->{$mn};
@@ -83,8 +83,8 @@ for my $mn (qw( open open-ok close close-ok flow flow-ok )) {
     my $ch = $chs->{$side};
     isa_ok($ch, 'Parse::AMQP::ProtocolDefinitions::Chassis', '... proper type $ch');
     is($ch->implement, 'MUST', '... and expected implement attr value');
-    is($ch->parent, $m, "... not a bastard, I like having a father");
-    is($ch->sys, $pd, '... but my sys is still the proper one');
+    is($ch->parent, $m, "... not parentless, I like having a father");
+    is($ch->sys, $m->sys, '... but my sys is still the proper one');
   }
   
   $rs = $m->responses;
@@ -96,8 +96,8 @@ for my $mn (qw( open open-ok close close-ok flow flow-ok )) {
     ok($r, "Method $mn has a response");
     isa_ok($r, 'Parse::AMQP::ProtocolDefinitions::Response', '... of the proper type');
     is($r->name, "${mn}-ok", '... and with the expected name (${mn}-ok)');
-    is($r->parent, $m, "... not a bastard, I like having a father");
-    is($r->sys, $pd, '... but my sys is still the proper one');
+    is($r->parent, $m, "... not parentless, I like having a father");
+    is($r->sys, $m->sys, '... but my sys is still the proper one');
   }
   else {
     ok(!defined($r), '... and no response');
