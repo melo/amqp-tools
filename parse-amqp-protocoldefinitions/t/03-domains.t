@@ -19,7 +19,7 @@ SPEC: for my $spec (@specs) {
 
   my $cs = $amqp->domains;
   ok($cs);
-  is(scalar(keys %$cs), 24);
+  is(scalar(keys %$cs), $spec->{t_domains});
 
   ## Some random testing
   my $c = $cs->{'delivery-tag'};
@@ -58,12 +58,14 @@ SPEC: for my $spec (@specs) {
   is($c->label, 'exchange name');
   like($c->doc, qr/The exchange name is a client-selected string that/);
   my $as = $c->assertions;
-  ok($as);
-  is(scalar(@$as),    2);
+  is(ref($as), 'ARRAY');
+  ok(@$as);
   is($as->[0]->check, 'length');
   is($as->[0]->value, '127');
-  is($as->[1]->check, 'regexp');
-  is($as->[1]->value, '^[a-zA-Z0-9-_.:]*$');
+  if (($spec->{version} gt '000009000')) {
+    is($as->[1]->check, 'regexp');
+    is($as->[1]->value, '^[a-zA-Z0-9-_.:]*$');
+  }
 
   for my $aa (@$as) {
     is($aa->parent, $c,      "... not parentless, I like having a father");

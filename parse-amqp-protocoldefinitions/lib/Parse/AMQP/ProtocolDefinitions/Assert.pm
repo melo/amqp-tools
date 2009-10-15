@@ -5,7 +5,7 @@ use Moose::Util::TypeConstraints;
 
 extends 'Parse::AMQP::ProtocolDefinitions::Base';
 
-enum 'AssertCheck', qw( notnull length regexp le ne );
+enum 'AssertCheck', qw( notnull length regexp le ne syntax null );
 
 has check => (
   isa => 'AssertCheck',
@@ -29,6 +29,12 @@ has field => (
   is  => 'rw',
 );
 
+## For 'syntax', rule
+has rule => (
+  isa => 'Str',
+  is  => 'rw',
+);
+
 with
   'Parse::AMQP::ProtocolDefinitions::Roles::ParseSequence',
   'Parse::AMQP::ProtocolDefinitions::Roles::HasValidAttrs';
@@ -42,7 +48,7 @@ __PACKAGE__->meta->make_immutable;
 ##############################
 
 sub xpath_expr  {'assert'}
-sub valid_attrs {qw(check value method field)}
+sub valid_attrs {qw(check value method field rule)}
 
 ##############################
 

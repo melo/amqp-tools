@@ -19,7 +19,7 @@ SPEC: for my $spec (@specs) {
 
   my $cs = $amqp->classes;
   ok($cs);
-  is(scalar(keys %$cs), 6);
+  is(scalar(keys %$cs), $spec->{t_classes});
 
   my $c = $cs->{'channel'};
   ok($c);
@@ -54,9 +54,23 @@ SPEC: for my $spec (@specs) {
 
   my $cms = $c->methods;
   ok($cms);
-  is(ref($cms),          'HASH');
-  is(scalar(keys %$cms), 6);
-  ok(exists $cms->{$_}) for (qw( open open-ok close close-ok flow flow-ok ));
+  is(ref($cms), 'HASH');
+
+  my (@all_methods, @sync_methods);
+  if ($spec->{name} eq 'amqp-0.9.1') {
+    @all_methods  = qw( open open-ok close close-ok flow flow-ok );
+    @sync_methods = qw( open open-ok close close-ok flow );
+  }
+  else {
+    @all_methods = qw(
+      open open-ok close close-ok flow flow-ok
+      ok resume pong ping
+    );
+    @sync_methods = qw( open open-ok close close-ok flow );
+  }
+
+  is(scalar(keys %$cms), scalar(@all_methods));
+  ok(exists $cms->{$_}) for (@all_methods);
   for my $cm (values %$cms) {
     isa_ok(
       $cm,
@@ -67,7 +81,7 @@ SPEC: for my $spec (@specs) {
     is($cm->sys,    $c->sys, '... but my sys is still the proper one');
   }
   ok($cms->{$_}->synchronous, "method '$_' is synchronous")
-    for (qw( open open-ok close close-ok flow ));
+    for (@sync_methods);
   ok(!$cms->{'flow-ok'}->synchronous, "method 'flow-ok' is NOT synchronous");
 
   my $m = $cms->{open};
@@ -159,11 +173,20 @@ SPEC: for my $spec (@specs) {
     '... field ' . $_->name
   ) for (@$fs);
 
-  is($fs->[0]->name, 'reserved-1', 'Field reserved-1 with proper name');
-  ok($fs->[0]->reserved, '... it is a reserved field');
-  is($fs->[0]->type, 'short', '... of type short');
-  ok(!$fs->[0]->domain, '... so without a domain');
-  ok(!$fs->[0]->label,  '... and without a label');
+  if ($spec->{version} le '000009000') {
+    is($fs->[0]->name, 'ticket', "Field 'ticket' with proper name");
+    ok(!$fs->[0]->reserved, '... it is not a reserved field');
+    is($fs->[0]->domain, 'access-ticket',
+      '... so with a domain, access-ticket');
+    ok(!$fs->[0]->label, '... but no label on this one');
+    ok(!$fs->[0]->type,  '... and no type');
+    ok(!$fs->[0]->doc,   '... and with no docs');
+  }
+  else {
+    is($fs->[0]->name, 'reserved-1', 'Field reserved-1 with proper name');
+    ok($fs->[0]->reserved, '... it is a reserved field');
+  }
+  ok(!$fs->[0]->label, '... and without a label');
 
   is($fs->[1]->name, 'queue', 'Field queue with proper name');
   ok(!$fs->[1]->reserved, '... it is not a reserved field');
@@ -172,7 +195,7 @@ SPEC: for my $spec (@specs) {
   ok(!$fs->[1]->type,  '... and no type');
   like(
     $fs->[1]->doc,
-    qr/Specifies the name of the queue to get a message from/,
+    qr/Specifies the name of the queue to (consume|get a message) from/,
     '... although we get docs'
   );
 
