@@ -6,9 +6,10 @@ requires(qw( xpath_expr parse ));
 
 sub parse_all {
   my ($class, $doc, @args) = @_;
-  my @all;
+  my $name = $class->xpath_expr;
   
-  for my $elem ($doc->findnodes($class->xpath_expr)) {
+  my @all;
+  for my $elem ($doc->findnodes($name)) {
     my $obj = $class->new(@args);
     $obj->parse($elem);
     push @all, $obj;
