@@ -19,7 +19,7 @@ SPEC: for my $spec (@specs) {
 
   my $cs = $amqp->constants;
   ok($cs);
-  is(scalar(keys %$cs), 24);
+  is(scalar(keys %$cs), $spec->{t_constants});
 
   ## Some random testing
   my $c = $cs->{'frame-error'};
@@ -28,7 +28,7 @@ SPEC: for my $spec (@specs) {
   is($c->value, '501');
   is($c->class, 'hard-error');
   like($c->doc,
-    qr/sender sent a malformed frame that the recipient could not decode/);
+    qr/(sender|client) sent a malformed frame that the (recipient|server) could not decode/);
   is($c->parent, $amqp, "... not parentless, I like having a father");
   is(
     $c->sys,
