@@ -19,7 +19,7 @@ SPEC: for my $spec (@specs) {
 
   is($amqp->major,    $spec->{major});
   is($amqp->minor,    $spec->{minor});
-  is($amqp->revision, $spec->{revision});
+  is($amqp->revision, $spec->{revision}) if $spec->{revision};
   is($amqp->port,     5672);
   ok($amqp->comment);
 }
