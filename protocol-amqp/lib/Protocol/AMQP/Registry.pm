@@ -6,8 +6,11 @@ use Carp qw( confess );
 
 ##################################
 
-sub register_frame_type { shift; _register('frame-types', @_) }
-sub fetch_frame_type { shift; _fetch('frame-types', @_) }
+sub register_frame_type { shift; _register('frames', @_) }
+sub fetch_frame_type { shift; _fetch('frames', @_) }
+
+sub register_method_type { shift; _register('meths', "$_[0]-$_[1]", $_[2]) }
+sub fetch_method_type { shift; _fetch('meths', join('-', @_)) }
 
 
 ##################################

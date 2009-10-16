@@ -41,12 +41,21 @@ cmp_deeply(
   }
 );
 
+
 ### register frames
 lives_ok sub  { $c->register_frame_type(1 => ['aa']) };
 throws_ok sub { $c->register_frame_type(1 => ['bb']) },
   qr/FATAL: double registration/;
 cmp_deeply($c->fetch_frame_type(1), ['aa']);
 ok(!defined($c->fetch_frame_type(2)));
+
+
+### register methods
+lives_ok sub  { $c->register_method_type(1, 1, 1) };
+throws_ok sub { $c->register_method_type(1, 1, 1) },
+  qr/FATAL: double registration/;
+cmp_deeply([$c->fetch_method_type(1, 1)], [1]);
+ok(!defined($c->fetch_method_type(1, 2)));
 
 
 done_testing();
