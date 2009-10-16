@@ -6,10 +6,16 @@ use Carp qw( confess );
 
 ##################################
 
+sub register_frame_type { shift; _register('frame-types', @_) }
+sub fetch_frame_type { shift; _fetch('frame-types', @_) }
+
+
+##################################
+
 my %registry;
 
 sub _register {
-  my ($class, $type, $id, $value) = @_;
+  my ($type, $id, $value) = @_;
   my ($file, $line) = (caller(1))[1, 2];
 
   if (my $prev = $registry{$type}{$id}) {
@@ -27,16 +33,16 @@ sub _register {
 }
 
 sub _fetch {
-  my ($class, $type, $id) = @_;
-  
+  my ($type, $id) = @_;
+
   return unless $type;
-  
+
   return unless exists $registry{$type};
   my $cr = $registry{$type};
-  
+
   return $cr unless defined $id;
   return unless exists $cr->{$id};
-  
+
   return $cr->{$id}{value};
 }
 
