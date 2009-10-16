@@ -3,6 +3,8 @@ package Protocol::AMQP::Peer;
 ## A sockt connection to a AMQP peer
 
 use Moose;
+use Protocol::AMQP::Constants qw( :all );
+use Protocol::AMQP::Util qw( extract_table );
 
 has impl => (
   isa      => 'Object',
@@ -36,12 +38,23 @@ has [qw(connect_cb write_cb shutdown_cb destroy_cb )] => (
 no Moose;
 __PACKAGE__->meta->make_immutable;
 
+##################################
+
+sub conn_exception {
+  my ($self) = @_;
+
+  ## TODO: send connection exception here...
+
+  $self->close;
+}
+
+
 ###################################
 
 ## impl => peer: start the connection
 sub impl_connect {
   my $self = shift;
-  
+
   _trace('call impl connect_cb');
   my $connect_cb = $self->{connect_cb};
   $self->{impl}->$connect_cb();
@@ -73,8 +86,8 @@ sub impl_error {
   my $self = shift;
   _trace("AMQP error: ", \@_);
 
-  $self->shutdown;
-  $self->destroy;
+  $self->impl_shutdown;
+  $self->impl_destroy;
 
   return;
 }
@@ -134,20 +147,82 @@ sub _recv_protocol_header {
     @version{qw(version major minor revision)} =
       split(//, substr($hdr, 4, 4));
 
-    $self->error('amqp_max_version', \%version);
+    $self->impl_error('amqp_max_version', \%version);
     return;
   }
 
   _trace('our protocol header was accepted, switch to frame parser');
-  $self->{parser} = \&_frame_parser;
+  $self->{parser} = \&_frame_dispatcher;
   return 1;
 }
 
-sub _frame_parser {
+my @frame_dispatch_table;
+$frame_dispatch_table[AMQP_FRAME_METHOD]    = \&_handle_method_frame;
+$frame_dispatch_table[AMQP_FRAME_HEADER]    = \&_handle_header_frame;
+$frame_dispatch_table[AMQP_FRAME_BODY]      = \&_handle_body_frame;
+$frame_dispatch_table[AMQP_FRAME_HEARTBEAT] = \&_handle_heartbeat_frame;
+
+sub _frame_dispatcher {
   my ($self, $bref) = @_;
 
-  ## TODO: implement frame parser here
+  _trace('not enough data for frame header'), return
+    if length($$bref) < 7;
+
+  my ($type, $chan, $size) = unpack('CnN', substr($$bref, 0, 7, ''));
+  _trace("Got frame type $type chan $chan size $size");
+
+  $self->impl_error('AMQP: invalid frame type ' . $type), return
+    unless exists $frame_dispatch_table[$type];
+
+  ## Read payload and frame-end
+  $self->{parser} = sub {
+    my ($self, $bref) = @_;
+
+    _trace('not enough data for frame payload'), return
+      if length($$bref) < $size + 1;    ## include frame-header + frame-end
+
+    my $marker = ord(substr($$bref, $size, 1, ''));
+    $self->impl_error("AMQP: invalid frame-end marker chr($marker)"), return
+      unless $marker == 0xCE;
+
+    $frame_dispatch_table[$type]
+      ->($self, substr($$bref, 0, $size, ''), $chan, $size);
+
+    $self->{parser} = \&_frame_dispatcher;
+    return 1;
+  };
+
+  return 1;
 }
+
+sub _handle_method_frame {
+  my ($self, $payload, $chan, $size) = @_;
+
+  my ($class_id, $method_id) = unpack('nn', substr($payload, 0, 4, ''));
+  _trace("Found method frame for class $class_id method $method_id");
+
+  if ($class_id == 10 && $method_id == 10) {
+    my %args;
+    @args{qw(major minor srv_props mechs locales)} =
+      unpack('C C N/a N/a N/a', $payload);
+    $args{srv_props} = extract_table($args{srv_props});
+
+    _trace('Found Connection.Start(): ', \%args);
+  }
+}
+
+sub _handle_heartbeat_frame {
+  my ($self, $bref, $chan, $size) = @_;
+
+  if ($chan == 0) {
+    _trace('Got heartbeat frame');
+    ## TODO: reply to hearbeat frames
+  }
+  else {
+    $self->conn_exception(503, "AMQP: heartbeat frame on invalid chan $chan");
+  }
+}
+
 
 ##################################
 
@@ -162,17 +237,17 @@ sub _trace {
     if (my $type = ref $arg) {
       if ($type eq 'SCALAR') {
         my $partial = $$arg;
-        my $len = length($partial);
-        substr($partial, 45, $len, '...')        if $len > 45;
+        my $len     = length($partial);
+        substr($partial, 45, $len, '...') if $len > 45;
         push @args, Data::Dump::pp(\$partial), " (len $len)";
         next;
       }
-      
+
       $arg = Data::Dump::pp($arg);
     }
     push @args, $arg;
   }
-  
+
   my $pad = ' ';
   foreach my $l (split(/\015?\012/, join('', @args))) {
     print STDERR "# [$sub:$line]$pad$l\n";
