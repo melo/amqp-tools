@@ -5,6 +5,7 @@ package Protocol::AMQP::Peer;
 use Moose;
 use Protocol::AMQP::Constants qw( :all );
 use Protocol::AMQP::Util qw( extract_table );
+use Protocol::AMQP::Registry;
 
 has impl => (
   isa      => 'Object',
@@ -156,12 +157,6 @@ sub _recv_protocol_header {
   return 1;
 }
 
-my @frame_dispatch_table;
-$frame_dispatch_table[AMQP_FRAME_METHOD]    = \&_handle_method_frame;
-$frame_dispatch_table[AMQP_FRAME_HEADER]    = \&_handle_header_frame;
-$frame_dispatch_table[AMQP_FRAME_BODY]      = \&_handle_body_frame;
-$frame_dispatch_table[AMQP_FRAME_HEARTBEAT] = \&_handle_heartbeat_frame;
-
 sub _frame_dispatcher {
   my ($self, $bref) = @_;
 
@@ -171,8 +166,9 @@ sub _frame_dispatcher {
   my ($type, $chan, $size) = unpack('CnN', substr($$bref, 0, 7, ''));
   _trace("Got frame type $type chan $chan size $size");
 
+  my $frame_handler = Protocol::AMQP::Registry->fetch_frame_type($type);
   $self->impl_error('AMQP: invalid frame type ' . $type), return
-    unless exists $frame_dispatch_table[$type];
+    unless $frame_handler;
 
   ## Read payload and frame-end
   $self->{parser} = sub {
@@ -185,8 +181,7 @@ sub _frame_dispatcher {
     $self->impl_error("AMQP: invalid frame-end marker chr($marker)"), return
       unless $marker == 0xCE;
 
-    $frame_dispatch_table[$type]
-      ->($self, substr($$bref, 0, $size, ''), $chan, $size);
+    $frame_handler->($self, substr($$bref, 0, $size, ''), $chan, $size);
 
     $self->{parser} = \&_frame_dispatcher;
     return 1;
@@ -194,6 +189,9 @@ sub _frame_dispatcher {
 
   return 1;
 }
+
+
+##################################
 
 sub _handle_method_frame {
   my ($self, $payload, $chan, $size) = @_;
@@ -210,6 +208,20 @@ sub _handle_method_frame {
     _trace('Found Connection.Start(): ', \%args);
   }
 }
+Protocol::AMQP::Registry->register_frame_type(AMQP_FRAME_METHOD,
+  \&_handle_method_frame);
+
+sub _handle_header_frame {
+  confess("Unhandled frame type " . AMQP_FRAME_HEADER);
+}
+Protocol::AMQP::Registry->register_frame_type(AMQP_FRAME_HEADER,
+  \&_handle_header_frame);
+
+sub _handle_body_frame {
+  confess("Unhandled frame type " . AMQP_FRAME_BODY);
+}
+Protocol::AMQP::Registry->register_frame_type(AMQP_FRAME_BODY,
+  \&_handle_body_frame);
 
 sub _handle_heartbeat_frame {
   my ($self, $bref, $chan, $size) = @_;
@@ -222,6 +234,8 @@ sub _handle_heartbeat_frame {
     $self->conn_exception(503, "AMQP: heartbeat frame on invalid chan $chan");
   }
 }
+Protocol::AMQP::Registry->register_frame_type(AMQP_FRAME_HEARTBEAT,
+  \&_handle_heartbeat_frame);
 
 
 ##################################
