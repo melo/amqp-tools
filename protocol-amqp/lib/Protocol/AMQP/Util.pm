@@ -4,9 +4,11 @@ use strict;
 use warnings;
 use parent qw( Exporter );
 use Carp qw( confess );
+use Protocol::AMQP::Registry;
 
 @Protocol::AMQP::Util::EXPORT_OK = qw(
   pack_table unpack_table
+  pack_method unpack_method
 );
 
 ##################################
@@ -108,6 +110,55 @@ sub unpack_table {
 
   return \%table;
 }
+
+
+##################################
+
+sub pack_method {
+  my ($class_id, $meth_id, %args) = @_;
+
+  my $meth_info = Protocol::AMQP::Registry->fetch_method($class_id, $meth_id);
+  Carp::confess("Method not found class $class_id method $meth_id, ")
+    unless $meth_info;
+  my ($name, $fields, $format, @fixes) = @$meth_info;
+
+  for my $fix (@fixes) {
+    my ($f, undef, $pack) = @$fix;
+    $args{$f} = $pack->($args{$f});
+  }
+  my $buf = pack($format, @args{@$fields});
+
+  _trace("Packed $name(): ", \$buf);
+
+  return $buf;
+}
+
+sub unpack_method {
+  my ($class_id, $meth_id, $buf) = @_;
+
+  my $meth_info = Protocol::AMQP::Registry->fetch_method($class_id, $meth_id);
+  Carp::confess("Method not found class $class_id method $meth_id, ")
+    unless $meth_info;
+  my ($name, $fields, $format, @fixes) = @$meth_info;
+
+  my %invoc;
+  @invoc{@$fields} = unpack($format, $buf);
+  for my $fix (@fixes) {
+    my ($f, $unpack) = @$fix;
+    $invoc{$f} = $unpack->($invoc{$f});
+  }
+
+  _trace("Found $name(): ", \%invoc);
+
+  return {
+    name       => $name,
+    class_id   => $class_id,
+    method_id  => $meth_id,
+    invocation => \%invoc,
+    meta       => $meth_info,
+  };
+}
+
 
 ##################################
 

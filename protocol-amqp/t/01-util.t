@@ -6,7 +6,11 @@ use Test::More;
 use Test::Deep;
 use Test::Exception;
 
-use Protocol::AMQP::Util qw( pack_table unpack_table );
+use Protocol::AMQP::V000009001;
+use Protocol::AMQP::Util qw(
+  pack_table unpack_table
+  pack_method unpack_method
+);
 
 ##################################
 
@@ -43,9 +47,36 @@ while (@tables) {
   my $packed;
   lives_ok sub { $packed = pack_table($result) };
   lives_ok sub { $result = unpack_table($packed) };
-  
+
   cmp_deeply($result, $expected);
 }
+
+
+##################################
+
+my %meth = (
+  version_major     => 0,
+  version_minor     => 9,
+  server_properties => {
+    hi   => {s => 'mom'},
+    cool => {S => 'dad'},
+    nice => {I => 32},
+  },
+  mechanisms => 'PLAIN',
+  locales    => 'en-US pt-PT pt-BR',
+);
+
+## pack Connection.Start
+my $buf = pack_method(10, 10, %meth);
+ok($buf);
+my $res = unpack_method(10, 10, $buf);
+
+cmp_deeply(\%meth, $res->{invocation});
+is($res->{class_id},  10);
+is($res->{method_id}, 10);
+is(ref($res->{meta}), 'ARRAY');
+is($res->{meta}[0],   $res->{name});
+is($res->{name},      'connection_start');
 
 
 done_testing();
