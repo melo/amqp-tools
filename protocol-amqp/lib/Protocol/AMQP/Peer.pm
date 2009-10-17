@@ -21,7 +21,7 @@ has remote_port => (
 );
 
 has parser => (
-  isa => 'CodeRef',
+  isa => 'ArrayRef',
   is  => 'rw',
 );
 
@@ -79,9 +79,11 @@ sub _on_read {
   ## No parser? we are skipping until EOF
   $$bref = '', return unless $self->{parser};
 
+  my $parser;
   do {
     trace('reading buf ', $bref);
-  } while ($$bref && $self->{parser}->($self, $bref));
+    $parser = $self->{parser};
+  } while ($$bref && $parser && $parser->[0]($self, $bref, $parser->[1]));
   trace('done reading');
 }
 
@@ -97,7 +99,7 @@ sub _send_protocol_header {
   trace("header is ", \$protocol_header);
 
   $self->write($protocol_header);
-  $self->{parser} = \&_parse_protocol_header;
+  $self->{parser} = [\&_parse_protocol_header];
   return;
 }
 
@@ -119,11 +121,11 @@ sub _parse_protocol_header {
   }
 
   trace('our protocol header was accepted, switch to frame parser');
-  $self->{parser} = \&_frame_dispatcher;
+  $self->{parser} = [\&_frame_parser];
   return 1;
 }
 
-sub _frame_dispatcher {
+sub _frame_parser {
   my ($self, $bref) = @_;
 
   trace('not enough data for frame header'), return
@@ -135,29 +137,34 @@ sub _frame_dispatcher {
   ## FIXME: revisit this - if we have to shutdown the socket, you must
   ## place it in "ignore all bytes incoming until EOF" - mayber we need
   ## a state 'waiting_for_eof' - check if on_read fix is enough
-  my $frame_handler = Protocol::AMQP::Registry->fetch_frame_type($type);
   $self->error('AMQP: invalid frame type ' . $type), return
-    unless $frame_handler;
+    unless Protocol::AMQP::Registry->fetch_frame_type($type);
 
   ## Read payload and frame-end
-  $self->{parser} = sub {
-    my ($self, $bref) = @_;
+  $self->{parser} = [\&_frame_dispatcher, [$type, $chan, $size]];
 
-    trace('not enough data for frame payload'), return
-      if length($$bref) < $size + 1;    ## include frame-header + frame-end
+  return 1;
+}
 
-    my $marker = ord(substr($$bref, $size, 1, ''));
-    ## FIXME: revisit this - same problem - we need to 'skip until EOF'
-    ## check if on_read fix is enough
-    $self->error("AMQP: invalid frame-end marker chr($marker)"), return
-      unless $marker == 0xCE;
+sub _frame_dispatcher {
+  my ($self, $bref, $args) = @_;
+  my ($type, $chan, $size) = @$args;
 
-    $frame_handler->($self, substr($$bref, 0, $size, ''), $chan, $size);
+  trace('not enough data for frame payload'), return
+    if length($$bref) < $size + 1;    ## include frame-header + frame-end
 
-    $self->{parser} = \&_frame_dispatcher;
-    return 1;
-  };
+use Data::Dump qw(pp); print STDERR ">>>>>> ", pp($bref, "$size ".substr($$bref, $size));
 
+  my $marker = ord(substr($$bref, $size, 1, ''));
+  ## FIXME: revisit this - same problem - we need to 'skip until EOF'
+  ## check if on_read fix is enough
+  $self->error("AMQP: invalid frame-end marker chr($marker)"), return
+    unless $marker == 0xCE;
+
+  Protocol::AMQP::Registry->fetch_frame_type($type)
+    ->($self, substr($$bref, 0, $size, ''), $chan, $size);
+
+  $self->{parser} = [\&_frame_dispatcher];
   return 1;
 }
 
