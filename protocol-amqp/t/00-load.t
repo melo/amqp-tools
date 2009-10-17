@@ -10,4 +10,6 @@ use_ok('Protocol::AMQP::Util');
 
 use_ok('Protocol::AMQP::Peer');
 
+use_ok('Protocol::AMQP::Client');
+
 done_testing();

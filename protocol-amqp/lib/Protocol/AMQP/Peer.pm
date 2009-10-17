@@ -8,16 +8,10 @@ use Protocol::AMQP::Registry;
 use Protocol::AMQP::Constants qw( :all );
 use Protocol::AMQP::Util qw( unpack_method trace );
 
-has impl => (
-  isa      => 'Object',
-  is       => 'rw',
-  required => 1,
-);
-
 has remote_addr => (
   isa      => 'Str',
   is       => 'ro',
-  required => 1,
+  default  => '127.0.0.1',
 );
 
 has remote_port => (
@@ -31,20 +25,36 @@ has parser => (
   is  => 'rw',
 );
 
-has [qw(connect_cb write_cb shutdown_cb destroy_cb )] => (
-  isa      => 'CodeRef',
-  is       => 'ro',
-  required => 1
-);
-
 no Moose;
 __PACKAGE__->meta->make_immutable;
 
 ##################################
 
+sub connect  { confess("Implement connect()  on " . ref($_[0]) . ", ") }
+sub write    { confess("Implement write() on " . ref($_[0]) . ", ") }
+sub close    { confess("Implement close() on " . ref($_[0]) . ", ") }
+
+sub error {
+  my $self = shift;
+  trace("AMQP error: ", \@_);
+
+  $self->close(@_);
+  $self->cleanup(@_);
+
+  return;
+}
+
+sub cleanup {
+  trace('Connection is closed, cleanup Peer');
+  delete $_[0]->{parser};
+  return;
+}
+
+
+##################################
+
 sub conn_exception {
   my ($self) = @_;
-
   ## TODO: send connection exception here...
 
   $self->close;
@@ -53,19 +63,8 @@ sub conn_exception {
 
 ###################################
 
-## impl => peer: start the connection
-sub impl_connect {
-  my $self = shift;
-
-  trace('call impl connect_cb');
-  my $connect_cb = $self->{connect_cb};
-  $self->{impl}->$connect_cb();
-
-  return $self;
-}
-
 ## impl => peer: report socket established
-sub impl_connect_ok {
+sub _on_connect_ok {
   my ($self) = @_;
   trace('socket connection established');
 
@@ -74,8 +73,11 @@ sub impl_connect_ok {
 }
 
 ## impl => peer: impl haz data for peer
-sub impl_read {
+sub _on_read {
   my ($self, $bref) = @_;
+  
+  ## No parser? we are skipping until EOF
+  $$bref = '', return unless $self->{parser};
 
   do {
     trace('reading buf ', $bref);
@@ -83,60 +85,23 @@ sub impl_read {
   trace('done reading');
 }
 
-## impl => peer: impl haz socket error
-sub impl_error {
-  my $self = shift;
-  trace("AMQP error: ", \@_);
-
-  $self->impl_shutdown;
-  $self->impl_destroy;
-
-  return;
-}
-
-## peer => impl: we are shutindown, please close that socket
-sub impl_shutdown {
-  my ($self) = @_;
-  trace('ask for socket shutdown');
-
-  trace('calling impl shutdown_cb');
-  my $shutdown_cb = $self->{shutdown_cb};
-  $self->{impl}->$shutdown_cb();
-
-  return;
-}
-
-## peer => impl: we are shutdown, clear internal state
-sub impl_destroy {
-  my ($self) = @_;
-  trace('destroy peer internals');
-
-  trace('calling impl destroy_cb');
-  my $destroy_cb = $self->{destroy_cb};
-  $self->impl->$destroy_cb();
-
-  %$self = ();
-  return;
-}
-
 
 ##################################
 
 sub _send_protocol_header {
   my ($self) = @_;
-  my $write_cb = $self->write_cb;
 
   ## TODO: from registered AMQP protocol specs, fetch possible list of
   ## headers to send, pick best, prepare retries with the others
   my $protocol_header = "AMQP\x00\x00\x09\x01";
   trace("header is ", \$protocol_header);
 
-  $self->{impl}->$write_cb($protocol_header);
-  $self->{parser} = \&_recv_protocol_header;
+  $self->write($protocol_header);
+  $self->{parser} = \&_parse_protocol_header;
   return;
 }
 
-sub _recv_protocol_header {
+sub _parse_protocol_header {
   my ($self, $bref) = @_;
 
   trace('not enough data to check proto header'), return
@@ -149,7 +114,7 @@ sub _recv_protocol_header {
     @version{qw(version major minor revision)} =
       split(//, substr($hdr, 4, 4));
 
-    $self->impl_error('amqp_max_version', \%version);
+    $self->error('amqp_max_version', \%version);
     return;
   }
 
@@ -167,8 +132,11 @@ sub _frame_dispatcher {
   my ($type, $chan, $size) = unpack('CnN', substr($$bref, 0, 7, ''));
   trace("Got frame type $type chan $chan size $size");
 
+  ## FIXME: revisit this - if we have to shutdown the socket, you must
+  ## place it in "ignore all bytes incoming until EOF" - mayber we need
+  ## a state 'waiting_for_eof' - check if on_read fix is enough
   my $frame_handler = Protocol::AMQP::Registry->fetch_frame_type($type);
-  $self->impl_error('AMQP: invalid frame type ' . $type), return
+  $self->error('AMQP: invalid frame type ' . $type), return
     unless $frame_handler;
 
   ## Read payload and frame-end
@@ -179,7 +147,9 @@ sub _frame_dispatcher {
       if length($$bref) < $size + 1;    ## include frame-header + frame-end
 
     my $marker = ord(substr($$bref, $size, 1, ''));
-    $self->impl_error("AMQP: invalid frame-end marker chr($marker)"), return
+    ## FIXME: revisit this - same problem - we need to 'skip until EOF'
+    ## check if on_read fix is enough
+    $self->error("AMQP: invalid frame-end marker chr($marker)"), return
       unless $marker == 0xCE;
 
     $frame_handler->($self, substr($$bref, 0, $size, ''), $chan, $size);
@@ -233,6 +203,5 @@ sub _handle_heartbeat_frame {
 }
 Protocol::AMQP::Registry->register_frame_type(AMQP_FRAME_HEARTBEAT,
   \&_handle_heartbeat_frame);
-
 
 1;
