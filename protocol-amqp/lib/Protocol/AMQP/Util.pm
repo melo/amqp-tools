@@ -173,17 +173,17 @@ sub _trace {
     if (my $type = ref $arg) {
       if ($type eq 'SCALAR') {
         my $partial = $$arg;
-        my $len = length($partial);
-        substr($partial, 45, $len, '...')        if $len > 45;
+        my $len     = length($partial);
+        substr($partial, 45, $len, '...') if $len > 45;
         push @args, Data::Dump::pp(\$partial), " (len $len)";
         next;
       }
-      
+
       $arg = Data::Dump::pp($arg);
     }
     push @args, $arg;
   }
-  
+
   my $pad = ' ';
   foreach my $l (split(/\015?\012/, join('', @args))) {
     print STDERR "# [$sub:$line]$pad$l\n";
