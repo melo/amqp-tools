@@ -17,8 +17,8 @@ has hdl => (
 sub connect {
   my ($self) = @_;
 
-  trace("Start connect to ",
-    $self->remote_addr, ' port ', $self->remote_port);
+  trace("Start connect to ", $self->remote_addr, ' port ',
+    $self->remote_port);
 
   my $hdl = AnyEvent::Handle->new(
     connect => [$self->remote_addr, $self->remote_port],
@@ -46,7 +46,7 @@ sub close {
 
 after cleanup => sub {
   trace('cleanup old connection');
-  
+
   my $hdl = delete $_[0]{hdl};
   $hdl->destroy;
   return;

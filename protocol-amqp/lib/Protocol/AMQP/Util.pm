@@ -168,6 +168,7 @@ use Data::Dump ();
 sub trace {
   my ($line) = (caller(0))[2];
   my ($sub)  = (caller(1))[3];
+  $sub =~ s/^Protocol::AMQP:://;
   
   my $buffer;
   my $has_buffer = ref($_[0]);

@@ -9,9 +9,9 @@ use Protocol::AMQP::Constants qw( :all );
 use Protocol::AMQP::Util qw( unpack_method trace );
 
 has remote_addr => (
-  isa      => 'Str',
-  is       => 'ro',
-  default  => '127.0.0.1',
+  isa     => 'Str',
+  is      => 'ro',
+  default => '127.0.0.1',
 );
 
 has remote_port => (
@@ -30,9 +30,9 @@ __PACKAGE__->meta->make_immutable;
 
 ##################################
 
-sub connect  { confess("Implement connect()  on " . ref($_[0]) . ", ") }
-sub write    { confess("Implement write() on " . ref($_[0]) . ", ") }
-sub close    { confess("Implement close() on " . ref($_[0]) . ", ") }
+sub connect { confess("Implement connect()  on " . ref($_[0]) . ", ") }
+sub write   { confess("Implement write() on " . ref($_[0]) . ", ") }
+sub close   { confess("Implement close() on " . ref($_[0]) . ", ") }
 
 sub error {
   my $self = shift;
@@ -75,7 +75,7 @@ sub _on_connect_ok {
 ## impl => peer: impl haz data for peer
 sub _on_read {
   my ($self, $bref) = @_;
-  
+
   ## No parser? we are skipping until EOF
   $$bref = '', return unless $self->{parser};
 
