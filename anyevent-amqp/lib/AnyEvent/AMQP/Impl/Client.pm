@@ -25,6 +25,7 @@ sub connect {
 
     on_connect => sub { $self->_on_connect_ok() },
     on_read    => sub { $self->_on_read(\($_[0]->{rbuf})) },
+    on_eof     => sub { $self->error('expected eof') },
     on_error   => sub { $self->error($_[2]) },
   );
 
