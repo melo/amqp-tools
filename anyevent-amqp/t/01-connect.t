@@ -4,22 +4,25 @@ use strict;
 use warnings;
 use Test::More;
 use Test::Exception;
+use Devel::LeakGuard::Object qw( leakguard );
 
 use AnyEvent;
 use AnyEvent::AMQP::Impl::Client;
 
-my $cv = AE::cv();
-
 ## Assume localhost connection, default port
-my $cln;
-lives_ok sub {
-  $cln = AnyEvent::AMQP::Impl::Client->new(
+my $result;
+leakguard {
+  my $cv = AE::cv();
+  
+  my $cln = AnyEvent::AMQP::Impl::Client->new(
     on_connect    => sub { $_[0]->close },
     on_disconnect => sub { $cv->send('done') }
   );
-};
-$cln->connect;
 
-is($cv->recv, 'done');
+  $cln->connect;
+  $result = $cv->recv;
+} on_leak => 'die';
+
+is $result, 'done', 'expected result';
 
 done_testing();
