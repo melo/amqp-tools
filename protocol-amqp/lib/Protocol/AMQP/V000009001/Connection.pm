@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Protocol::AMQP::Registry;
-use Protocol::AMQP::Util qw( extract_table );
+use Protocol::AMQP::Util qw( pack_table unpack_table );
 
 ## Connection.Start
 Protocol::AMQP::Registry->register_method(

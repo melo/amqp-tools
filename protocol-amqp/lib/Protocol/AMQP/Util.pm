@@ -6,12 +6,10 @@ use parent qw( Exporter );
 use Carp qw( confess );
 
 @Protocol::AMQP::Util::EXPORT_OK = qw(
-  extract_table
+  pack_table unpack_table
 );
 
 ##################################
-
-sub extract_table;    ## Forward decl
 
 my %type_table = (
   'V' => [''],
@@ -30,10 +28,43 @@ my %type_table = (
   'S' => ['N/a', -4],
   's' => ['C/a', -1],
 
-  'F' => ['N/a', \&extract_table],  
+  'F' => ['N/a', \&unpack_table, \&pack_table],
 );
 
-sub extract_table {
+sub pack_table {
+  my ($table) = @_;
+  my @fields;
+
+  ## TODO: fix signed values
+  ## TODO: implement field-array - how to reuse this next table?
+
+  while (my ($f, $cv) = each %$table) {
+    next unless $cv;
+    confess("Invalid value '$cv', needs to be a hashref, ")
+      unless ref($cv) && ref($cv) eq 'HASH';
+
+    my ($ot, $v) = %$cv;
+    my ($t, $sp);
+    do {
+      $t  = $sp;
+      $t  = $ot unless $t;
+      $sp = $type_table{$t};
+    } until !defined($sp) || ref($sp);
+    confess("Invalid table field-type '$ot'/'$t', ") unless $sp;
+
+    my ($format, undef, $pack) = @$sp;
+    next unless $format;
+
+    $v = $pack->($v) if $pack;
+    push @fields, pack("C/a a $format", $f, $t, ref($v) ? @$v : $v);
+  }
+
+  ## TODO: validate fields, connection exception if not valid (see 4.2.5.5)
+
+  return join('', @fields);
+}
+
+sub unpack_table {
   my ($buf) = @_;
   my %table;
 
@@ -51,12 +82,12 @@ sub extract_table {
 
     my $rule = $type_table{$t};
     my ($format, $delta) = @$rule;
-    
+
     if ($format) {
       my @v = unpack($format, substr($buf, $offset));
       if   (@v > 1) { $value = \@v }
       else          { $value = $v[0] }
-      
+
       if (ref $delta) {
         $offset += length($value);
         $value = $delta->($value);
@@ -69,7 +100,7 @@ sub extract_table {
       }
     }
 
-    $table{$name} = { $t => $value };
+    $table{$name} = {$t => $value};
     substr($buf, 0, $offset, '');
   }
 

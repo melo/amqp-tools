@@ -4,7 +4,7 @@ package Protocol::AMQP::Peer;
 
 use Moose;
 use Protocol::AMQP::Constants qw( :all );
-use Protocol::AMQP::Util qw( extract_table );
+use Protocol::AMQP::Util qw( unpack_table );
 use Protocol::AMQP::Registry;
 
 has impl => (
@@ -203,7 +203,7 @@ sub _handle_method_frame {
     my %args;
     @args{qw(major minor srv_props mechs locales)} =
       unpack('C C N/a N/a N/a', $payload);
-    $args{srv_props} = extract_table($args{srv_props});
+    $args{srv_props} = unpack_table($args{srv_props});
 
     _trace('Found Connection.Start(): ', \%args);
   }
