@@ -3,9 +3,10 @@ package Protocol::AMQP::Peer;
 ## A sockt connection to a AMQP peer
 
 use Moose;
-use Protocol::AMQP::Constants qw( :all );
-use Protocol::AMQP::Util qw( unpack_table );
+use Protocol::AMQP::V000009001;
 use Protocol::AMQP::Registry;
+use Protocol::AMQP::Constants qw( :all );
+use Protocol::AMQP::Util qw( unpack_method );
 
 has impl => (
   isa      => 'Object',
@@ -199,14 +200,10 @@ sub _handle_method_frame {
   my ($class_id, $method_id) = unpack('nn', substr($payload, 0, 4, ''));
   _trace("Found method frame for class $class_id method $method_id");
 
-  if ($class_id == 10 && $method_id == 10) {
-    my %args;
-    @args{qw(major minor srv_props mechs locales)} =
-      unpack('C C N/a N/a N/a', $payload);
-    $args{srv_props} = unpack_table($args{srv_props});
+  my $meth = unpack_method($class_id, $method_id, $payload);
+  _trace("Prepare to dispatch ", $meth);
 
-    _trace('Found Connection.Start(): ', \%args);
-  }
+  ## TODO: dispatch method to on_method() handler
 }
 Protocol::AMQP::Registry->register_frame_type(AMQP_FRAME_METHOD,
   \&_handle_method_frame);
