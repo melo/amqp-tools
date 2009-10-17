@@ -9,6 +9,7 @@ use Protocol::AMQP::Registry;
 @Protocol::AMQP::Util::EXPORT_OK = qw(
   pack_table unpack_table
   pack_method unpack_method
+  trace
 );
 
 ##################################
@@ -128,7 +129,7 @@ sub pack_method {
   }
   my $buf = pack($format, @args{@$fields});
 
-  _trace("Packed $name(): ", \$buf);
+  trace("Packed $name(): ", \$buf);
 
   return $buf;
 }
@@ -148,7 +149,7 @@ sub unpack_method {
     $invoc{$f} = $unpack->($invoc{$f});
   }
 
-  _trace("Found $name(): ", \%invoc);
+  trace("Found $name(): ", \%invoc);
 
   return {
     name       => $name,
@@ -164,9 +165,19 @@ sub unpack_method {
 
 use Data::Dump ();
 
-sub _trace {
+sub trace {
   my ($line) = (caller(0))[2];
   my ($sub)  = (caller(1))[3];
+  
+  my $buffer;
+  my $has_buffer = ref($_[0]);
+  if ($has_buffer && $has_buffer eq 'SCALAR') {
+    $buffer = shift;
+  }
+  else {
+    $buffer = \(my $space);
+    undef $has_buffer;
+  }
 
   my @args;
   foreach my $arg (@_) {
@@ -184,13 +195,16 @@ sub _trace {
     push @args, $arg;
   }
 
-  my $pad = ' ';
+  my $pad = '';
   foreach my $l (split(/\015?\012/, join('', @args))) {
-    print STDERR "# [$sub:$line]$pad$l\n";
-    $pad = '+   ';
+    $$buffer .= "# [$sub:$line]$pad $l\n";
+    $pad = '+  ' unless $pad;
   }
+  
+  print STDERR $$buffer unless $has_buffer;
 
   return;
 }
+
 
 1;

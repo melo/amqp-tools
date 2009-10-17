@@ -10,7 +10,47 @@ use Protocol::AMQP::V000009001;
 use Protocol::AMQP::Util qw(
   pack_table unpack_table
   pack_method unpack_method
+  trace
 );
+
+
+##################################
+
+## place trace call here, so that line number don't change after each file modification
+my $trace_call = sub {
+  my $buffer;
+  trace(\$buffer, @_);
+  return $buffer;
+};
+
+my $small_buf = 'a' x 20;
+my $big_buf   = 'A' x 60;
+
+my @trace_test_cases = (
+  'basic' => {
+    input  => ['olas'],
+    output => "# [Test::Exception::lives_ok:50] olas\n",
+  },
+
+  complex => {
+    input  => ['good good', {a => 1}, ' and ', \$small_buf],
+    output => qq{# [Test::Exception::lives_ok:50] good good{ a => 1 } and \\"aaaaaaaaaaaaaaaaaaaa" (len 20)\n},
+  },
+
+  big => {
+    input  => ['oh my, so... ', \$big_buf],
+    output => qq{# [Test::Exception::lives_ok:50] oh my, so... \\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA..." (len 60)\n},
+  },
+);
+
+while (@trace_test_cases) {
+  my ($name, $spec) = splice(@trace_test_cases, 0, 2);
+  my $buffer;
+  
+  lives_ok sub { trace(\$buffer, @{$spec->{input}}) };
+  is($buffer, $spec->{output});
+}
+
 
 ##################################
 
