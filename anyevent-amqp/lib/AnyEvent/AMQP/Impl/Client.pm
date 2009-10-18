@@ -25,7 +25,12 @@ sub connect {
 
     on_connect => sub { $self->_on_connect_ok() },
     on_read    => sub { $self->_on_read(\($_[0]->{rbuf})) },
-    on_eof     => sub { $self->error('expected eof') },
+    ## TODO: revisit this, it should be handled at the protocol level
+    # if we receive an eof it means that we will not read anything else,
+    # but it does not mean that we can't still write. The proper
+    # solution is to pass this notification to the upper protocol layer,
+    # and let it decide if we must signal an error, or just a cleanup
+    on_eof     => sub { $self->error('eof') },
     on_error   => sub { $self->error($_[2]) },
   );
 
