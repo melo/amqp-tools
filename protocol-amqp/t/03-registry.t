@@ -58,4 +58,23 @@ cmp_deeply([$c->fetch_method(1, 1)], [1]);
 ok(!defined($c->fetch_method(1, 2)));
 
 
+### register protocol version
+lives_ok sub { $c->register_version('0.9.1' => {order => '000009001'}) };
+throws_ok sub { $c->register_version('0.9.1' => {}) },
+  qr/FATAL: double registration/;
+cmp_deeply($c->fetch_version('0.9.1'), {order => '000009001'});
+ok(!defined($c->fetch_version('0.10.0')));
+
+cmp_deeply(
+  $c->fetch_version,
+  { '0.9.1' => {
+      file => "t/03-registry.t",
+      id   => "0.9.1",
+      line => 62,        ## you change lines above me, and this will change...
+      type => "version",
+      value => {order => "000009001"},
+    }
+  }
+);
+
 done_testing();
