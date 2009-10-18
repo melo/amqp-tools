@@ -165,8 +165,6 @@ sub _frame_dispatcher {
   trace('not enough data for frame payload'), return
     if length($$bref) < $size + 1;    ## include frame-header + frame-end
 
-use Data::Dump qw(pp); print STDERR ">>>>>> ", pp($bref, "$size ".substr($$bref, $size));
-
   my $marker = ord(substr($$bref, $size, 1, ''));
   ## FIXME: revisit this - same problem - we need to 'skip until EOF'
   ## check if on_read fix is enough
