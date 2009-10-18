@@ -25,10 +25,7 @@ has parser => (
   is  => 'rw',
 );
 
-has [qw{on_connect on_disconnect}] => (
-  isa => 'CodeRef',
-  is  => 'ro',
-);
+with 'Protocol::AMQP::Roles::UserCallbacks';
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
@@ -53,11 +50,10 @@ sub cleanup {
   my ($self) = @_;
 
   trace('Calling on_disconnect_cb');
-  my $on_disconnect_cb = $self->on_disconnect;
-  $self->$on_disconnect_cb() if $on_disconnect_cb;
+  $self->user_on_disconnect_cb;
 
   trace('Connection is closed, cleanup Peer');
-  delete $self->{$_} for qw( parser on_connect on_disconnect );
+  delete $self->{$_} for qw( parser );
   return;
 }
 
@@ -83,8 +79,7 @@ sub _on_connect_ok {
 
   ## FIXME: this is too soon, it should be after the Connection.Tune_Ok
   ## Only temporary to make sure our tests end
-  my $on_connect_cb = $self->on_connect;
-  $self->$on_connect_cb() if $on_connect_cb;
+  $self->user_on_connect_cb();
 
   return;
 }
