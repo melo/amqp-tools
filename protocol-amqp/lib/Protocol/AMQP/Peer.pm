@@ -3,7 +3,6 @@ package Protocol::AMQP::Peer;
 ## A sockt connection to a AMQP peer
 
 use Moose;
-use Protocol::AMQP::V000009001;
 use Protocol::AMQP::Registry;
 use Protocol::AMQP::Constants qw( :all );
 use Protocol::AMQP::Util qw( unpack_method trace );
