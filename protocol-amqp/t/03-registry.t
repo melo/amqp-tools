@@ -59,10 +59,11 @@ ok(!defined($c->fetch_method(1, 2)));
 
 
 ### register protocol version
-lives_ok sub { $c->register_version('0.9.1' => {order => '000009001'}) };
-throws_ok sub { $c->register_version('0.9.1' => {}) },
-  qr/FATAL: double registration/;
-cmp_deeply($c->fetch_version('0.9.1'), {order => '000009001'});
+lives_ok sub {
+  $c->register_version({major => 0, minor => 9, revision => 1, api => 'API'});
+};
+cmp_deeply($c->fetch_version('0.9.1'),
+  {major => 0, minor => 9, revision => 1, api => 'API', version => '0.9.1'});
 ok(!defined($c->fetch_version('0.10.0')));
 
 cmp_deeply(
@@ -70,11 +71,39 @@ cmp_deeply(
   { '0.9.1' => {
       file => "t/03-registry.t",
       id   => "0.9.1",
-      line => 62,        ## you change lines above me, and this will change...
-      type => "version",
-      value => {order => "000009001"},
+      line  => 63,       ## you change lines above me, and this will change...
+      type  => "version",
+      value => {
+        major    => 0,
+        minor    => 9,
+        revision => 1,
+        api      => 'API',
+        version  => '0.9.1'
+      },
     }
   }
 );
+
+my @fail_cases = (
+  { spec   => {},
+    throws => qr/Missing required attr 'major' in version registration, /,
+  },
+  { spec => {major => 0},
+    throws => qr/Missing required attr 'minor' in version registration, /,
+  },
+  { spec => {major => 0, minor => 9},
+    throws => qr/Missing required attr 'revision' in version registration, /,
+  },
+  { spec => {major => 0, minor => 9, revision => 1},
+    throws => qr/Missing required attr 'api' in version registration, /,
+  },
+  { spec => {major => 0, minor => 9, revision => 1, api => 'API2'},
+    throws => qr/FATAL: double registration for version 0.9.1/,
+  },
+);
+
+for my $tc (@fail_cases) {
+  throws_ok sub { $c->register_version($tc->{spec}) }, $tc->{throws};
+}
 
 done_testing();
