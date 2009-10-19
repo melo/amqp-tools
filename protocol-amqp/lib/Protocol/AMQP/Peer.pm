@@ -104,9 +104,9 @@ sub _on_read {
 sub _send_protocol_header {
   my ($self) = @_;
 
-  ## TODO: from registered AMQP protocol specs, fetch possible list of
-  ## headers to send, pick best, prepare retries with the others
-  my $protocol_header = "AMQP\x00\x00\x09\x01";
+  my $v = $self->_pick_best_protocol_version;
+  my $protocol_header =
+    pack('a* C CCC', "AMQP", 0, $v->{major}, $v->{minor}, $v->{revision});
   trace("header is ", \$protocol_header);
 
   $self->write($protocol_header);
@@ -219,5 +219,24 @@ sub _handle_heartbeat_frame {
 }
 Protocol::AMQP::Registry->register_frame_type(AMQP_FRAME_HEARTBEAT,
   \&_handle_heartbeat_frame);
+
+
+##################################
+
+sub _pick_best_protocol_version {
+  my ($self) = @_;
+
+  my $all = Protocol::AMQP::Registry->fetch_version();
+  return unless $all && %$all;
+
+  my @ordered = sort {
+         $all->{$b}{value}{major} <=> $all->{$a}{value}{major}
+      || $all->{$b}{value}{minor} <=> $all->{$a}{value}{minor}
+      || $all->{$b}{value}{revision} <=> $all->{$a}{value}{revision}
+  } keys %$all;
+
+  return $all->{$ordered[0]}{value};
+}
+
 
 1;
