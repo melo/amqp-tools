@@ -24,6 +24,11 @@ has parser => (
   is  => 'rw',
 );
 
+has version => (
+  isa => 'HashRef',
+  is  => 'rw',
+);
+
 with 'Protocol::AMQP::Roles::UserCallbacks';
 
 no Moose;
@@ -110,6 +115,7 @@ sub _send_protocol_header {
   trace("header is ", \$protocol_header);
 
   $self->write($protocol_header);
+  $self->version($v);
   $self->{parser} = [\&_parse_protocol_header];
   return;
 }
