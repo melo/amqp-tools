@@ -102,8 +102,8 @@ my %meth = (
     cool => {S => 'dad'},
     nice => {I => 32},
   },
-  mechanisms => 'PLAIN',
-  locales    => 'en-US pt-PT pt-BR',
+  mechanisms => ['PLAIN'],
+  locales    => [qw(en-US pt-PT pt-BR)],
 );
 
 ## pack Connection.Start

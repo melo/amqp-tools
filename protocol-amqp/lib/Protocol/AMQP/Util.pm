@@ -124,8 +124,20 @@ sub pack_method {
   my ($name, $fields, $format, @fixes) = @$meth_info;
 
   for my $fix (@fixes) {
-    my ($f, undef, $pack) = @$fix;
-    $args{$f} = $pack->($args{$f});
+    my ($f, $unpack, $pack) = @$fix;
+
+    if (ref($unpack) eq 'CODE') {
+      $args{$f} = $pack->($args{$f});
+    }
+    elsif ($unpack eq 'table') {
+      $args{$f} = pack_table($args{$f});
+    }
+    elsif ($unpack eq 'space_separated') {
+      $args{$f} = join(' ', @{$args{$f}}) if ref $args{$f};
+    }
+    else {
+      confess "Fix rule '$unpack' not supported, ";
+    }
   }
   my $buf = pack($format, @args{@$fields});
 
@@ -146,7 +158,19 @@ sub unpack_method {
   @invoc{@$fields} = unpack($format, $buf);
   for my $fix (@fixes) {
     my ($f, $unpack) = @$fix;
-    $invoc{$f} = $unpack->($invoc{$f});
+
+    if (ref($unpack) eq 'CODE') {
+      $invoc{$f} = $unpack->($invoc{$f});
+    }
+    elsif ($unpack eq 'table') {
+      $invoc{$f} = unpack_table($invoc{$f});
+    }
+    elsif ($unpack eq 'space_separated') {
+      $invoc{$f} = [split(' ', $invoc{$f})];
+    }
+    else {
+      confess "Fix rule '$unpack' not supported, ";
+    }
   }
 
   trace("Found $name(): ", \%invoc);
@@ -169,7 +193,7 @@ sub trace {
   my ($line) = (caller(0))[2];
   my ($sub)  = (caller(1))[3];
   $sub =~ s/^Protocol::AMQP:://;
-  
+
   my $buffer;
   my $has_buffer = ref($_[0]);
   if ($has_buffer && $has_buffer eq 'SCALAR') {
@@ -201,7 +225,7 @@ sub trace {
     $$buffer .= "# [$sub:$line]$pad $l\n";
     $pad = '+  ' unless $pad;
   }
-  
+
   print STDERR $$buffer unless $has_buffer;
 
   return;
