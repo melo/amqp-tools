@@ -4,16 +4,23 @@ use Moose::Role;
 
 requires 'cleanup';
 
-has [qw{on_connect on_disconnect}] => (
+has 'on_connect' => (
   isa => 'Str|CodeRef',
   is  => 'ro',
+  clearer => 'clear_on_connect',
+);
+
+has 'on_disconnect' => (
+  isa => 'Str|CodeRef',
+  is  => 'ro',
+  clearer => 'clear_on_disconnect',
 );
 
 sub user_on_connect_cb {
   my $self = shift;
   return unless my $cb = $self->on_connect;
   
-  $self->$cb(@_) if $cb;
+  $self->$cb(@_);
   return;
 }
 
@@ -21,14 +28,15 @@ sub user_on_disconnect_cb {
   my $self = shift;
   return unless my $cb = $self->on_disconnect;
   
-  $self->$cb(@_) if $cb;
+  $self->$cb(@_);
   return;
 }
 
 after cleanup => sub {
   my ($self) = @_;
   
-  delete $self->{$_} for qw( on_connect on_disconnect );
+  $self->clear_on_connect;
+  $self->clear_on_disconnect;
 };
 
 1;
