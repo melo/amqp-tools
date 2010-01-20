@@ -116,12 +116,13 @@ sub unpack_table {
 ##################################
 
 sub pack_method {
-  my ($class_id, $meth_id, %args) = @_;
+  my %args = ref($_[-1]) eq 'HASH'? %{pop @_} : ();
+  my @meth = @_;
 
-  my $meth_info = Protocol::AMQP::Registry->fetch_method($class_id, $meth_id);
-  Carp::confess("Method not found class $class_id method $meth_id, ")
+  my $meth_info = Protocol::AMQP::Registry->fetch_method(@meth);
+  Carp::confess("Method not found for @meth, ")
     unless $meth_info;
-  my ($name, $fields, $format, @fixes) = @$meth_info;
+  my ($class_id, $meth_id, $name, $fields, $format, @fixes) = @$meth_info;
 
   for my $fix (@fixes) {
     my ($f, $unpack, $pack) = @$fix;
@@ -147,12 +148,13 @@ sub pack_method {
 }
 
 sub unpack_method {
-  my ($class_id, $meth_id, $buf) = @_;
+  my $buf = pop @_;
+  my @meth = @_;
 
-  my $meth_info = Protocol::AMQP::Registry->fetch_method($class_id, $meth_id);
-  Carp::confess("Method not found class $class_id method $meth_id, ")
+  my $meth_info = Protocol::AMQP::Registry->fetch_method(@meth);
+  Carp::confess("Method not found for @meth, ")
     unless $meth_info;
-  my ($name, $fields, $format, @fixes) = @$meth_info;
+  my ($class_id, $meth_id, $name, $fields, $format, @fixes) = @$meth_info;
 
   my %invoc;
   @invoc{@$fields} = unpack($format, $buf);

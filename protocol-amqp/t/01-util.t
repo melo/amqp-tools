@@ -114,16 +114,25 @@ my %meth = (
 );
 
 ## pack Connection.Start
-my $buf = pack_method(10, 10, %meth);
-ok($buf);
-my $res = unpack_method(10, 10, $buf);
+for my $spec ([10, 10], ['connection_start']) {
+  my $buf = pack_method(@$spec, \%meth);
+  ok($buf, "Properly packed method @$spec");
+  my $res = unpack_method(@$spec, $buf);
+  ok($res, "... and unpacked it ok");
 
-cmp_deeply(\%meth, $res->{invocation});
-is($res->{class_id},  10);
-is($res->{method_id}, 10);
-is(ref($res->{meta}), 'ARRAY');
-is($res->{meta}[0],   $res->{name});
-is($res->{name},      'connection_start');
+  cmp_deeply(\%meth, $res->{invocation}, 'Method invocation as expected');
+  is($res->{class_id},  10,      'class_id with the proper value');
+  is($res->{method_id}, 10,      'method_id with the proper value');
+  is($res->{name}, 'connection_start', 'name with the expected value');
+
+  is(ref($res->{meta}), 'ARRAY', 'the meta attribute is an ARRAY');
+  is($res->{meta}[0], $res->{class_id},
+    '... first element is the class_id');
+  is($res->{meta}[1], $res->{method_id},
+    '... second element is the method_id');
+  is($res->{meta}[2], $res->{name},
+    '... and its third element is the method name');
+}
 
 
 done_testing();
