@@ -42,7 +42,8 @@ sub pack_table {
   ## TODO: implement field-array - how to reuse this next table?
 
   while (my ($f, $cv) = each %$table) {
-    next unless $cv;
+    next unless defined $cv;
+    $cv = {S => $cv} unless ref $cv;    ## Assume strings
     confess("Invalid value '$cv', needs to be a hashref, ")
       unless ref($cv) && ref($cv) eq 'HASH';
 

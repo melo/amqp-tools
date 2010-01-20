@@ -98,6 +98,8 @@ while (@tables) {
   cmp_deeply($result, $expected);
 }
 
+cmp_deeply(unpack_table(pack_table({stuff => 'string as default'})), {stuff => { S => 'string as default'}});
+
 
 ##################################
 
