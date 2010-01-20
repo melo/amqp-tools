@@ -16,15 +16,15 @@ sub register_method {
 sub fetch_method { shift; _fetch('meths', join('-', @_)) }
 
 sub register_version {
-  my ($class, $spec) = @_;;
-  
+  my ($class, $spec) = @_;
+
   for my $attr (qw( major minor revision api )) {
     confess("Missing required attr '$attr' in version registration, ")
       unless defined $spec->{$attr};
   }
   my $version = join('.', @{$spec}{qw(major minor revision)});
   $spec->{version} = $version;
-  
+
   _register('version', $version, $spec);
 }
 sub fetch_version { shift; _fetch('version', @_) }
