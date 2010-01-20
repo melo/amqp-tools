@@ -51,6 +51,13 @@ while (@trace_test_cases) {
   is($buffer, $spec->{output});
 }
 
+my $hashref = {a => 1};
+my $buffer;
+lives_ok sub { trace(\$buffer, $hashref) },
+  'trace() will not die while testing for argument respect';
+is(ref($hashref), 'HASH', '... and afterwards, our $hashref is still a HASH');
+cmp_deeply($hashref, {a => 1}, '... and with the proper content');
+
 
 ##################################
 

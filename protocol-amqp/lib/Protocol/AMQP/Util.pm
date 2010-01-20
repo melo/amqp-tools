@@ -204,24 +204,25 @@ sub trace {
     undef $has_buffer;
   }
 
-  my @args;
-  foreach my $arg (@_) {
+  my @args = @_;
+  my @result;
+  foreach my $arg (@args) {
     if (my $type = ref $arg) {
       if ($type eq 'SCALAR') {
         my $partial = $$arg;
         my $len     = length($partial);
         substr($partial, 45, $len, '...') if $len > 45;
-        push @args, Data::Dump::pp(\$partial), " (len $len)";
+        push @result, Data::Dump::pp(\$partial), " (len $len)";
         next;
       }
 
       $arg = Data::Dump::pp($arg);
     }
-    push @args, $arg;
+    push @result, $arg;
   }
 
   my $pad = '';
-  foreach my $l (split(/\015?\012/, join('', @args))) {
+  foreach my $l (split(/\015?\012/, join('', @result))) {
     $$buffer .= "# [$sub:$line]$pad $l\n";
     $pad = '+  ' unless $pad;
   }
