@@ -3,7 +3,7 @@ AMQP stack for Perl
 
 This repo contains an implementation of the AMQP protocol for Perl.
 
-This is work-in-progress, you might be interested on the [very basic TODO list](todo.markdown).
+This is work-in-progress, you might be interested on the [very basic TODO list](amqp-tools/blob/master/todo.markdown).
 
 The following distributions are available:
 
