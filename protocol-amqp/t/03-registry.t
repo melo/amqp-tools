@@ -51,10 +51,13 @@ ok(!defined($c->fetch_frame_type(2)));
 
 
 ### register methods
-lives_ok sub  { $c->register_method(1, 1, 1) };
-throws_ok sub { $c->register_method(1, 1, 1) },
+lives_ok sub  { $c->register_method(1, 1, ['method_a', 1]) };
+throws_ok sub { $c->register_method(1, 1, ['method_b', 1]) },
   qr/FATAL: double registration/;
-cmp_deeply([$c->fetch_method(1, 1)], [1]);
+throws_ok sub { $c->register_method(1, 2, ['method_a', 1]) },
+  qr/FATAL: double registration/;
+cmp_deeply($c->fetch_method(1, 1), ['method_a', 1]);
+cmp_deeply($c->fetch_method('method_a'), ['method_a', 1]);
 ok(!defined($c->fetch_method(1, 2)));
 
 
@@ -71,7 +74,7 @@ cmp_deeply(
   { '0.9.1' => {
       file => "t/03-registry.t",
       id   => "0.9.1",
-      line  => 63,       ## you change lines above me, and this will change...
+      line  => 66,       ## you change lines above me, and this will change...
       type  => "version",
       value => {
         major    => 0,
