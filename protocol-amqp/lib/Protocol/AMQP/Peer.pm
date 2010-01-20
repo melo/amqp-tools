@@ -196,11 +196,8 @@ sub _frame_dispatcher {
 sub _handle_method_frame {
   my ($self, $payload, $chan, $size) = @_;
 
-  my ($class_id, $method_id) = unpack('nn', substr($payload, 0, 4, ''));
-  trace("Found method frame for class $class_id method $method_id");
-
-  my $meth = unpack_method($class_id, $method_id, $payload);
-  trace("Prepare to dispatch ", $meth);
+  my $meth = unpack_method($payload);
+  trace("Prepare to dispatch method '$meth->{name}'", $meth);
 
   ## TODO: dispatch method to on_method() handler
 }

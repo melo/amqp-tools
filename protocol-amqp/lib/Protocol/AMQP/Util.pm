@@ -141,21 +141,21 @@ sub pack_method {
       confess "Fix rule '$unpack' not supported, ";
     }
   }
-  my $buf = pack($format, @args{@$fields});
+  my $buf = pack("nn$format", $class_id, $meth_id, @args{@$fields});
 
   trace("Packed $name(): ", \$buf);
-
+  
   return $buf;
 }
 
 sub unpack_method {
-  my $buf = pop @_;
-  my @meth = @_;
+  my ($buf) = @_;
 
-  my $meth_info = Protocol::AMQP::Registry->fetch_method(@meth);
-  Carp::confess("Method not found for @meth, ")
+  my ($class_id, $meth_id) = unpack('nn', substr($buf, 0, 4, ''));
+  my $meth_info = Protocol::AMQP::Registry->fetch_method($class_id, $meth_id);
+  Carp::confess("Method not found for class $class_id meth $meth_id, ")
     unless $meth_info;
-  my ($class_id, $meth_id, $name, $fields, $format, @fixes) = @$meth_info;
+  my (undef, undef, $name, $fields, $format, @fixes) = @$meth_info;
 
   my %invoc;
   @invoc{@$fields} = unpack($format, $buf);

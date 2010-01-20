@@ -119,7 +119,7 @@ my %meth = (
 for my $spec ([10, 10], ['connection_start']) {
   my $buf = pack_method(@$spec, \%meth);
   ok($buf, "Properly packed method @$spec");
-  my $res = unpack_method(@$spec, $buf);
+  my $res = unpack_method($buf);
   ok($res, "... and unpacked it ok");
 
   cmp_deeply(\%meth, $res->{invocation}, 'Method invocation as expected');
