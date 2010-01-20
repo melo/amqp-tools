@@ -64,6 +64,13 @@ sub cleanup {
 
 ##################################
 
+sub handle_method {
+  confess 'Implement handle_method() on ' . (ref($_[0]) || $_[0]) . ', ';
+}
+
+
+##################################
+
 sub conn_exception {
   my ($self) = @_;
   ## TODO: send connection exception here...
