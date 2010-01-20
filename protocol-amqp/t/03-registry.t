@@ -26,17 +26,14 @@ my $v = Protocol::AMQP::Registry::_fetch('my-class', 'id');
 cmp_deeply($v, {aa => 11});
 
 my $r = Protocol::AMQP::Registry::_fetch('my-class');
-$v = delete $r->{id}{file};
-ok($v);
-like($v, qr{t/03-registry[.]t$});
-
 cmp_deeply(
   $r,
   { id => {
       id    => 'id',
       type  => 'my-class',
       value => {aa => 11},
-      line  => 19,
+      line  => re('^\d+$'),
+      file  => re('/?t/03-registry[.]t$'),
     }
   }
 );
@@ -74,7 +71,7 @@ cmp_deeply(
   { '0.9.1' => {
       file => "t/03-registry.t",
       id   => "0.9.1",
-      line  => 66,       ## you change lines above me, and this will change...
+      line  => re('^\d+$'),
       type  => "version",
       value => {
         major    => 0,
