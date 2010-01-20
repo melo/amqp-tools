@@ -11,7 +11,7 @@ sub fetch_frame_type { shift; _fetch('frames', @_) }
 
 sub register_method {
   shift;
-  _register('meths', ["$_[0]-$_[1]", $_[2][0]], $_[2]);
+  _register('meths', ["$_[0]-$_[1]", $_[2][2]], $_[2]);
 }
 sub fetch_method { shift; _fetch('meths', join('-', @_)) }
 
