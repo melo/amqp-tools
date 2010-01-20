@@ -229,7 +229,7 @@ sub trace {
     $pad = '+  ' unless $pad;
   }
 
-  print STDERR $$buffer unless $has_buffer;
+  warn($$buffer) unless $has_buffer;
 
   return;
 }
