@@ -145,11 +145,11 @@ sub _parse_protocol_header {
   }
 
   trace('our protocol header was accepted, switch to frame parser');
-  $self->{parser} = [\&_frame_parser];
+  $self->{parser} = [\&_parse_frame];
   return 1;
 }
 
-sub _frame_parser {
+sub _parse_frame {
   my ($self, $bref) = @_;
 
   trace('not enough data for frame header'), return
@@ -186,7 +186,7 @@ sub _frame_dispatcher {
   Protocol::AMQP::Registry->fetch_frame_type($type)
     ->($self, substr($$bref, 0, $size, ''), $chan, $size);
 
-  $self->{parser} = [\&_frame_dispatcher];
+  $self->{parser} = [\&_parse_frame];
   return 1;
 }
 
