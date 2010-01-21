@@ -4,7 +4,7 @@ use Moose::Role;
 use Protocol::AMQP::Util qw( pack_method trace );
 use Protocol::AMQP::Constants qw( AMQP_FRAME_METHOD );
 
-requires 'write';
+requires '_send_frame';
 
 has 'channel' => (
   isa      => 'Int',
