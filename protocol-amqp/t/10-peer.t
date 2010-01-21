@@ -31,30 +31,30 @@ ok(!defined $v, 'No versions registered, so no "best version" available');
 
 
 my @test_cases = (
-  { best => '0.9.2',
+  { best => '0.7.2',
     spec => {
       major    => '0',
-      minor    => '9',
+      minor    => '7',
       revision => '2',
-      api      => 'Protocol::AMQP::V000009002',
+      api      => 'Protocol::AMQP::V000007002',
     },
   },
 
-  { best => '0.9.2',
+  { best => '0.7.2',
     spec => {
       major    => '0',
-      minor    => '9',
+      minor    => '7',
       revision => '0',
-      api      => 'Protocol::AMQP::V000009000',
+      api      => 'Protocol::AMQP::V000007000',
     },
   },
 
-  { best => '0.10.0',
+  { best => '0.7.9',
     spec => {
       major    => '0',
-      minor    => '10',
-      revision => '0',
-      api      => 'Protocol::AMQP::V000010001',
+      minor    => '7',
+      revision => '9',
+      api      => 'Protocol::AMQP::V000007009',
     },
   },
 );
@@ -63,11 +63,11 @@ for my $tc (@test_cases) {
   my $spec = $tc->{spec};
 
   lives_ok sub { Protocol::AMQP::Registry->register_version($spec) },
-    'Register version $spec->{spec}{api} ok';
+    "Register version $spec->{api} ok";
   lives_ok sub { $v = $peer->_pick_best_protocol_version },
     '_pick_best_protocol_version() lived through it';
   ok(defined $v, '... and gaves us a defined answer');
-  is($v->{version}, $tc->{best}, '... that matches our expected answer');
+  is($v->{version}, $tc->{best}, "... that matches our expected answer, $tc->{best}");
 }
 
 
