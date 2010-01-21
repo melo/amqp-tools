@@ -117,6 +117,7 @@ my ($channel1, $channel2);
 lives_ok sub { $channel1 = $peer->open_channel }, 'Created a channel';
 isa_ok($channel1, 'Protocol::AMQP::Channel',
   'Got a valid channel with id ' . $channel1->channel);
+is($peer->get_channel($channel1->channel), $channel1, 'Same object returned for the channel id');
 
 lives_ok sub { $channel2 = $peer->open_channel }, 'Created another channel';
 isa_ok($channel2, 'Protocol::AMQP::Channel',
@@ -157,6 +158,8 @@ is($closed->channel, $channel2->channel,
 lives_ok sub { $closed = $peer->close_channel($channel2->channel) },
   'Closing an already closed channel does nothing';
 ok(!defined($closed), '... returns false');
+
+ok(!defined($peer->get_channel($channel1->channel)), 'Returned undef for missing channels');
 
 
 done_testing();

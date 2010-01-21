@@ -86,6 +86,14 @@ sub handle_method {
 
 ###################################
 
+sub get_channel {
+  my ($self, $id) = @_;
+  my $channels = $self->channels;
+  
+  return unless exists $channels->[$id];
+  return $channels->[$id];
+}
+
 sub open_channel {
   my ($self, $channel_id) = @_;
   my $channels = $self->channels;
