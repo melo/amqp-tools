@@ -112,4 +112,46 @@ cmp_deeply(
 );
 
 
+###################################
+my ($channel1, $channel2);
+lives_ok sub { $channel1 = $peer->open_channel }, 'Created a channel';
+isa_ok($channel1, 'Protocol::AMQP::Channel',
+  'Got a valid channel with id ' . $channel1->channel);
+
+lives_ok sub { $channel2 = $peer->open_channel }, 'Created another channel';
+isa_ok($channel2, 'Protocol::AMQP::Channel',
+  'Got a valid channel with id ' . $channel2->channel);
+
+isnt($channel1->channel, $channel2->channel, 'IDs are different');
+
+my $channel1_id = $channel1->channel;
+lives_ok sub { $peer->close_channel($channel1) }, 'Closed first channel ok';
+lives_ok sub { $channel1 = $peer->open_channel },
+  'Created yet another channel';
+isa_ok($channel1, 'Protocol::AMQP::Channel',
+  'Got a valid channel with id ' . $channel1->channel);
+is($channel1->channel, $channel1_id, 'ID was reused from closed channel');
+
+throws_ok sub { $peer->open_channel($channel1->channel) },
+  qr{Channel ID \d+ already taken, },
+  'Fail attempt to open a channel with an open channel_id';
+
+my $closed;
+lives_ok sub { $closed = $peer->close_channel($channel1) },
+  'Closed first channel ok';
+ok($closed, '... returns true');
+is($closed->channel, $channel1->channel,
+  '... and the expected closed channel');
+
+lives_ok sub { $closed = $peer->close_channel($channel2->channel) },
+  'Closed second channel by ID ok';
+ok($closed, '... returns true');
+is($closed->channel, $channel2->channel,
+  '... and the expected closed channel');
+
+lives_ok sub { $closed = $peer->close_channel($channel2->channel) },
+  'Closing an already closed channel does nothing';
+ok(!defined($closed), '... returns false');
+
+
 done_testing();

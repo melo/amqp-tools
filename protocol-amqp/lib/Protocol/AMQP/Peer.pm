@@ -6,6 +6,7 @@ use Moose;
 use Protocol::AMQP::Registry;
 use Protocol::AMQP::Constants qw( :all );
 use Protocol::AMQP::Util qw( unpack_method trace );
+use Protocol::AMQP::Channel;
 
 has remote_addr => (
   isa     => 'Str',
@@ -28,6 +29,13 @@ has parser => (
 has version => (
   isa => 'HashRef',
   is  => 'rw',
+);
+
+has 'channels' => (
+  isa      => 'ArrayRef',
+  is       => 'ro',
+  default  => sub { [] },
+  init_arg => undef,
 );
 
 with 'Protocol::AMQP::Roles::UserCallbacks',
@@ -69,6 +77,38 @@ sub cleanup {
 
 sub handle_method {
   confess 'Implement handle_method() on ' . (ref($_[0]) || $_[0]) . ', ';
+}
+
+
+###################################
+
+sub open_channel {
+  my ($self, $channel_id) = @_;
+  my $channels = $self->channels;
+
+  $channel_id = _find_unused_channel_id($channels) unless defined $channel_id;
+  confess("Channel ID $channel_id already taken, ")
+    if $channels->[$channel_id];
+
+  return $channels->[$channel_id] =
+    Protocol::AMQP::Channel->new({peer => $self, channel => $channel_id});
+}
+
+sub close_channel {
+  my ($self, $channel) = @_;
+  $channel = $channel->channel if blessed($channel);
+
+  return delete $self->channels->[$channel];
+}
+
+sub _find_unused_channel_id {
+  my ($channels) = @_;
+
+  my $id = 1;
+  while (exists $channels->[$id]) { $id++ }
+
+  # TODO: test for max channel limit
+  return $id;
 }
 
 
