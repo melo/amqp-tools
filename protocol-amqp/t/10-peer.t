@@ -2,15 +2,20 @@
 
 use strict;
 use warnings;
+use lib 't/tlib';
 use Test::More;
 use Test::Deep;
 use Test::Exception;
 
-use Protocol::AMQP::Peer;
-my $peer = 'Protocol::AMQP::Peer';
+use Protocol::AMQP::Constants qw( :frame );
+use Protocol::AMQP::Util qw( pack_method );
+
+use FakePeer;    ## has write() buffering
+my $peer = FakePeer->new;
+
+
 
 ##################################
-
 my $v;
 lives_ok sub { $v = $peer->_pick_best_protocol_version };
 ok(!defined $v);
