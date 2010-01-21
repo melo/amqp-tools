@@ -7,9 +7,6 @@ use Test::More;
 use Test::Deep;
 use Test::Exception;
 
-use Protocol::AMQP::Constants qw( :frame );
-use Protocol::AMQP::Util qw( pack_method );
-
 use FakePeer;    ## has write() buffering
 my $peer = FakePeer->new;
 
@@ -87,9 +84,7 @@ my $start_ok = {
 };
 
 require Protocol::AMQP::V000009001;
-my $frame =
-  $peer->_send_frame(AMQP_FRAME_METHOD, 0,
-  pack_method('connection_start_ok', $start_ok));
+my $frame = $peer->send_method('connection_start_ok', $start_ok);
 ok($frame, 'Got a frame length(' . length($frame) . ')');
 
 lives_ok sub { $peer->_on_read(\$frame) }, '_on_read() was able to take it';

@@ -30,10 +30,12 @@ has version => (
   is  => 'rw',
 );
 
-with 'Protocol::AMQP::Roles::UserCallbacks';
+with 'Protocol::AMQP::Roles::UserCallbacks',
+     'Protocol::AMQP::Roles::SendMethod';
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
+
 
 ##################################
 
