@@ -201,7 +201,12 @@ sub _handle_method_frame {
   my $meth = unpack_method($payload);
   trace("Prepare to dispatch method '$meth->{name}'", $meth);
 
-  ## TODO: dispatch method to on_method() handler
+  if ($chan == 0) {
+    $self->handle_method($meth);
+  }
+  else {
+    # TODO: fetch the channel object and handle_method on that one
+  }
 }
 Protocol::AMQP::Registry->register_frame_type(AMQP_FRAME_METHOD,
   \&_handle_method_frame);
