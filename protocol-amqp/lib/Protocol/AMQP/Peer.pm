@@ -20,12 +20,12 @@ has remote_port => (
   default => 5672,    ## IANA assigned port for AMQP
 );
 
-has parser => (
-  isa     => 'ArrayRef[CodeRef]',
-  is      => 'rw',
-  clearer => 'clear_parser',
-);
 
+has 'parser' => (
+  isa       => 'ArrayRef',
+  is        => 'rw',
+  clearer   => 'clear_parser',
+  predicate => 'has_parser',
 has version => (
   isa => 'HashRef',
   is  => 'rw',
@@ -164,12 +164,12 @@ sub _on_read {
   my ($self, $bref) = @_;
 
   ## If no parser, we are skipping reads until EOF
-  $$bref = '', return unless $self->{parser};
+  $$bref = '', return unless $self->has_parser;
 
   my $parser;
   do {
     trace('reading buf ', $bref);
-    $parser = $self->{parser};
+    $parser = $self->parser;
   } while ($$bref && $parser && $parser->[0]($self, $bref, $parser->[1]));
   trace('done reading');
 }
@@ -186,8 +186,8 @@ sub _send_protocol_header {
   trace('header is ', \$protocol_header, ' for version ', $v);
 
   $self->write($protocol_header);
+  $self->parser([\&_parse_protocol_header]);
   $self->version($v);
-  $self->{parser} = [\&_parse_protocol_header];
   return;
 }
 
@@ -210,7 +210,7 @@ sub _parse_protocol_header {
   }
 
   trace('our protocol header was accepted, switch to frame parser');
-  $self->{parser} = [\&_parse_frame];
+  $self->parser([\&_parse_frame]);
   return 1;
 }
 
@@ -239,7 +239,7 @@ sub _parse_frame {
     unless Protocol::AMQP::Registry->fetch_frame_type($type);
 
   ## Read payload and frame-end
-  $self->{parser} = [\&_frame_dispatcher, [$type, $chan, $size]];
+  $self->parser([\&_frame_dispatcher, [$type, $chan, $size]]);
 
   return 1;
 }
@@ -260,7 +260,7 @@ sub _frame_dispatcher {
   Protocol::AMQP::Registry->fetch_frame_type($type)
     ->($self, substr($$bref, 0, $size, ''), $chan, $size);
 
-  $self->{parser} = [\&_parse_frame];
+  $self->parser([\&_parse_frame]);
   return 1;
 }
 
