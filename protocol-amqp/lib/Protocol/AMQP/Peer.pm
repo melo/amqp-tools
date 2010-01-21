@@ -272,14 +272,14 @@ sub _handle_method_frame {
   my ($self, $payload, $chan, $size) = @_;
 
   my $meth = unpack_method($payload);
-  trace("Prepare to dispatch method '$meth->{name}'", $meth);
+  trace("Prepare to dispatch method '$meth->{name}' on channel $chan", $meth);
 
-  if ($chan == 0) {
-    $self->handle_method($meth);
-  }
-  else {
-    # TODO: fetch the channel object and handle_method on that one
-  }
+  my $channel = $self->get_channel($chan);
+
+ # TODO: what to do if we receive a method for a channel we don't have active?
+
+  $channel->handle_method($meth) if $channel;
+  return;
 }
 Protocol::AMQP::Registry->register_frame_type(AMQP_FRAME_METHOD,
   \&_handle_method_frame);
