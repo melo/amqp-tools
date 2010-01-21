@@ -10,20 +10,6 @@ use Test::Exception;
 use FakePeer;    ## has write() buffering
 my $peer = FakePeer->new;
 
-ok(!defined($peer->parser), 'Non-connected peers have no parser');
-lives_ok sub {
-  $peer->parser([sub { }]);
-  },
-  'Set parser ok';
-ok(defined($peer->parser), '... correct, it has parser now');
-lives_ok sub { $peer->clear_parser }, 'Clear parser ok';
-ok(!defined($peer->parser), '... and the parser is gone again');
-
-lives_ok sub { $peer->_on_connect_ok; $peer->clear_write_buffer },
-  "Init'ed FakePeer ok";
-ok(defined($peer->parser), 'Now we have a parser, after connect');
-
-
 ##################################
 my $v;
 lives_ok sub { $v = $peer->_pick_best_protocol_version };
@@ -71,7 +57,23 @@ for my $tc (@test_cases) {
 }
 
 
+##################################
+ok(!defined($peer->parser), 'Non-connected peers have no parser');
+lives_ok sub {
+  $peer->parser([sub { }]);
+  },
+  'Set parser ok';
+ok(defined($peer->parser), '... correct, it has parser now');
+lives_ok sub { $peer->clear_parser }, 'Clear parser ok';
+ok(!defined($peer->parser), '... and the parser is gone again');
+
+lives_ok sub { $peer->_on_connect_ok; $peer->clear_write_buffer },
+  "Init'ed FakePeer ok";
+ok(defined($peer->parser), 'Now we have a parser, after connect');
+
+
 ###################################
+require Protocol::AMQP::V000009001;
 my $start_ok = {
   client_properties => {
     product => 'Perl Protocol::AMQP::Client',
@@ -83,7 +85,6 @@ my $start_ok = {
   response  => "\0guest\0guest",
 };
 
-require Protocol::AMQP::V000009001;
 my $frame = $peer->send_method('connection_start_ok', $start_ok);
 ok($frame, 'Got a frame length(' . length($frame) . ')');
 
