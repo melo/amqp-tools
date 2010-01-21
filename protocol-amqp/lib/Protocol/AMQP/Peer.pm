@@ -90,7 +90,7 @@ sub _on_connect_ok {
   $self->_send_protocol_header;
 
   ## FIXME: this is too soon, it should be after the Connection.Tune_Ok
-  ## Only temporary to make sure our tests end
+  ## Only temporary to make sure our tests end properly
   $self->user_on_connect_cb();
 
   return;
@@ -100,7 +100,7 @@ sub _on_connect_ok {
 sub _on_read {
   my ($self, $bref) = @_;
 
-  ## No parser? we are skipping until EOF
+  ## If no parser, we are skipping reads until EOF
   $$bref = '', return unless $self->{parser};
 
   my $parser;
@@ -120,7 +120,7 @@ sub _send_protocol_header {
   my $v = $self->_pick_best_protocol_version;
   my $protocol_header =
     pack('a* C CCC', "AMQP", 0, $v->{major}, $v->{minor}, $v->{revision});
-  trace("header is ", \$protocol_header);
+  trace('header is ', \$protocol_header, ' for version ', $v);
 
   $self->write($protocol_header);
   $self->version($v);
@@ -141,6 +141,7 @@ sub _parse_protocol_header {
     @version{qw(version major minor revision)} =
       split(//, substr($hdr, 4, 4));
 
+    # FIXME: we should provide a hook to negotiate down version
     $self->error('amqp_max_version', \%version);
     return;
   }
@@ -176,7 +177,7 @@ sub _frame_dispatcher {
   my ($type, $chan, $size) = @$args;
 
   trace('not enough data for frame payload'), return
-    if length($$bref) < $size + 1;    ## include frame-header + frame-end
+    if length($$bref) < $size + 1;    ## include frame-end
 
   my $marker = ord(substr($$bref, $size, 1, ''));
   ## FIXME: revisit this - same problem - we need to 'skip until EOF'
