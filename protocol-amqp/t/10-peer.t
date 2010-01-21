@@ -30,25 +30,25 @@ ok(defined($peer->parser), 'Now we have a parser, after connect');
 ##################################
 my $v;
 lives_ok sub { $v = $peer->_pick_best_protocol_version };
-ok(!defined $v);
+ok(!defined $v, 'No versions registered, so no "best version" available');
 
 
 my @test_cases = (
-  { best => '0.9.1',
+  { best => '0.9.2',
     spec => {
       major    => '0',
       minor    => '9',
-      revision => '1',
-      api      => 'Protocol::AMQP::V000009001',
+      revision => '2',
+      api      => 'Protocol::AMQP::V000009002',
     },
   },
 
-  { best => '0.9.1',
+  { best => '0.9.2',
     spec => {
       major    => '0',
       minor    => '9',
       revision => '0',
-      api      => 'Protocol::AMQP::V000009001',
+      api      => 'Protocol::AMQP::V000009000',
     },
   },
 
@@ -57,7 +57,7 @@ my @test_cases = (
       major    => '0',
       minor    => '10',
       revision => '0',
-      api      => 'Protocol::AMQP::V000009001',
+      api      => 'Protocol::AMQP::V000010001',
     },
   },
 );
@@ -65,10 +65,13 @@ my @test_cases = (
 for my $tc (@test_cases) {
   my $spec = $tc->{spec};
 
-  lives_ok sub { Protocol::AMQP::Registry->register_version($spec) };
-  lives_ok sub { $v = $peer->_pick_best_protocol_version };
-  ok(defined $v);
-  is($v->{version}, $tc->{best});
+  lives_ok sub { Protocol::AMQP::Registry->register_version($spec) },
+    'Register version $spec->{spec}{api} ok';
+  lives_ok sub { $v = $peer->_pick_best_protocol_version },
+    '_pick_best_protocol_version() lived through it';
+  ok(defined $v, '... and gaves us a defined answer');
+  is($v->{version}, $tc->{best}, '... that matches our expected answer');
 }
+
 
 done_testing();
