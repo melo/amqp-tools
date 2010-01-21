@@ -136,6 +136,11 @@ throws_ok sub { $peer->open_channel($channel1->channel) },
   qr{Channel ID \d+ already taken, },
   'Fail attempt to open a channel with an open channel_id';
 
+is($peer->channel, 0, 'Peer channel ID is 0');
+throws_ok sub { $peer->open_channel($peer) },
+  qr{Channel ID \d+ already taken, },
+  'Fail attempt to re-open peer channel 0';
+
 my $closed;
 lives_ok sub { $closed = $peer->close_channel($channel1) },
   'Closed first channel ok';

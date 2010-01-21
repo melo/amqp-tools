@@ -69,6 +69,10 @@ sub cleanup {
 
   trace('Connection is closed, cleanup Peer');
   $self->clear_parser;
+
+  trace('Close channel 0');
+  self->close_channel($self);
+
   return;
 }
 
@@ -86,12 +90,21 @@ sub open_channel {
   my ($self, $channel_id) = @_;
   my $channels = $self->channels;
 
+  my $channel;
+  if (blessed($channel_id)) {
+    $channel    = $channel_id;
+    $channel_id = $channel->channel;
+  }
+
   $channel_id = _find_unused_channel_id($channels) unless defined $channel_id;
   confess("Channel ID $channel_id already taken, ")
     if $channels->[$channel_id];
 
-  return $channels->[$channel_id] =
-    Protocol::AMQP::Channel->new({peer => $self, channel => $channel_id});
+  $channel =
+    Protocol::AMQP::Channel->new({peer => $self, channel => $channel_id})
+    unless $channel;
+
+  return $channels->[$channel_id] = $channel;
 }
 
 sub close_channel {
@@ -129,6 +142,7 @@ sub _on_connect_ok {
   my ($self) = @_;
   trace('socket connection established');
 
+  $self->open_channel($self);
   $self->_send_protocol_header;
 
   ## FIXME: this is too soon, it should be after the Connection.Tune_Ok
