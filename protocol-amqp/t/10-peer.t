@@ -58,7 +58,10 @@ for my $tc (@test_cases) {
 
 
 ##################################
+require Protocol::AMQP::V000009001;
 ok(!defined($peer->parser), 'Non-connected peers have no parser');
+ok(!defined($peer->api), '... not an API');
+
 lives_ok sub {
   $peer->parser([sub { }]);
   },
@@ -71,9 +74,11 @@ lives_ok sub { $peer->_on_connect_ok; $peer->clear_write_buffer },
   "Init'ed FakePeer ok";
 ok(defined($peer->parser), 'Now we have a parser, after connect');
 
+isa_ok($peer->api, 'Protocol::AMQP::V000009001',
+  'Found expected version in the API');
+
 
 ###################################
-require Protocol::AMQP::V000009001;
 my $start_ok = {
   client_properties => {
     product => 'Perl Protocol::AMQP::Client',

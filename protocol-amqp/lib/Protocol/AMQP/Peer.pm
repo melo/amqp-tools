@@ -20,15 +20,11 @@ has remote_port => (
   default => 5672,    ## IANA assigned port for AMQP
 );
 
-
 has 'parser' => (
   isa       => 'ArrayRef',
   is        => 'rw',
   clearer   => 'clear_parser',
   predicate => 'has_parser',
-has version => (
-  isa => 'HashRef',
-  is  => 'rw',
 );
 
 has 'channels' => (
@@ -37,6 +33,13 @@ has 'channels' => (
   default  => sub { [] },
   init_arg => undef,
 );
+
+has 'api' => (
+  isa     => 'Protocol::AMQP::API::Version',
+  is      => 'rw',
+  clearer => 'clear_api',
+);
+
 
 with 'Protocol::AMQP::Roles::UserCallbacks',
      'Protocol::AMQP::Roles::SendMethod';
@@ -68,6 +71,7 @@ sub cleanup {
 
   trace('Connection is closed, cleanup Peer');
   $self->clear_parser;
+  $self->clear_api;
 
   trace('Close channel 0');
   $self->close_channel($self);
@@ -186,8 +190,8 @@ sub _send_protocol_header {
   trace('header is ', \$protocol_header, ' for version ', $v);
 
   $self->write($protocol_header);
+  $self->api($v->{api}->new({peer => $self}));
   $self->parser([\&_parse_protocol_header]);
-  $self->version($v);
   return;
 }
 
