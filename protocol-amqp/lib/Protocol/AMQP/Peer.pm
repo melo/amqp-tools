@@ -71,7 +71,7 @@ sub cleanup {
   $self->clear_parser;
 
   trace('Close channel 0');
-  self->close_channel($self);
+  $self->close_channel($self);
 
   return;
 }
