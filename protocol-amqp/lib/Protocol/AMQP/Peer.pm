@@ -151,6 +151,15 @@ sub _parse_protocol_header {
   return 1;
 }
 
+sub _send_frame {
+  my ($self, $type, $chan, $payload) = @_;
+  my $size = length($payload);
+  
+  trace("Sending frame type $type over chan $chan, payload size $size");
+  
+  $self->write(pack('CnN', $type, $chan, $size) . $payload . chr(0xCE));
+}
+
 sub _parse_frame {
   my ($self, $bref) = @_;
 

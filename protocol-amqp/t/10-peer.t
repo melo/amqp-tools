@@ -74,4 +74,46 @@ for my $tc (@test_cases) {
 }
 
 
+###################################
+my $start_ok = {
+  client_properties => {
+    product => 'Perl Protocol::AMQP::Client',
+    version => '0.001',
+    contact => 'http://search.cpan.org/dist/Protocol-AMQP',
+  },
+  mechanism => 'PLAIN',
+  locale    => 'en-US',
+  response  => "\0guest\0guest",
+};
+
+require Protocol::AMQP::V000009001;
+my $frame =
+  $peer->_send_frame(AMQP_FRAME_METHOD, 0,
+  pack_method('connection_start_ok', $start_ok));
+ok($frame, 'Got a frame length(' . length($frame) . ')');
+
+lives_ok sub { $peer->_on_read(\$frame) }, '_on_read() was able to take it';
+is($frame, '', '... and consume all the bytes in the network buffer');
+
+cmp_deeply(
+  $peer->last_method,
+  { class_id   => 10,
+    invocation => {
+      client_properties => {
+        contact => {S => "http://search.cpan.org/dist/Protocol-AMQP"},
+        product => {S => "Perl Protocol::AMQP::Client"},
+        version => {S => "0.001"},
+      },
+      locale    => "en-US",
+      mechanism => "PLAIN",
+      response  => "\0guest\0guest",
+    },
+    meta      => ignore(),
+    method_id => 11,
+    name      => "connection_start_ok",
+  },
+  '... and the parsed method is the expected one'
+);
+
+
 done_testing();
