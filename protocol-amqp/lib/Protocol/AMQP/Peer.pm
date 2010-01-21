@@ -56,7 +56,6 @@ sub error {
   trace("AMQP error: ", \@_);
 
   $self->close(@_);
-  $self->cleanup(@_);
 
   return;
 }
