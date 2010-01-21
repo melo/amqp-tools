@@ -20,8 +20,9 @@ has remote_port => (
 );
 
 has parser => (
-  isa => 'ArrayRef',
-  is  => 'rw',
+  isa     => 'ArrayRef[CodeRef]',
+  is      => 'rw',
+  clearer => 'clear_parser',
 );
 
 has version => (
@@ -57,7 +58,7 @@ sub cleanup {
   $self->user_on_disconnect_cb;
 
   trace('Connection is closed, cleanup Peer');
-  delete $self->{$_} for qw( parser );
+  $self->clear_parser;
   return;
 }
 

@@ -13,6 +13,18 @@ use Protocol::AMQP::Util qw( pack_method );
 use FakePeer;    ## has write() buffering
 my $peer = FakePeer->new;
 
+ok(!defined($peer->parser), 'Non-connected peers have no parser');
+lives_ok sub {
+  $peer->parser([sub { }]);
+  },
+  'Set parser ok';
+ok(defined($peer->parser), '... correct, it has parser now');
+lives_ok sub { $peer->clear_parser }, 'Clear parser ok';
+ok(!defined($peer->parser), '... and the parser is gone again');
+
+lives_ok sub { $peer->_on_connect_ok; $peer->clear_write_buffer },
+  "Init'ed FakePeer ok";
+ok(defined($peer->parser), 'Now we have a parser, after connect');
 
 
 ##################################
