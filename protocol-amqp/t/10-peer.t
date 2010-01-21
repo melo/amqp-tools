@@ -53,19 +53,19 @@ for my $tc (@test_cases) {
   lives_ok sub { $v = $peer->_pick_best_protocol_version },
     '_pick_best_protocol_version() lived through it';
   ok(defined $v, '... and gaves us a defined answer');
-  is($v->{version}, $tc->{best}, "... that matches our expected answer, $tc->{best}");
+  is($v->{version}, $tc->{best},
+    "... that matches our expected answer, $tc->{best}");
 }
 
 
 ##################################
 require Protocol::AMQP::V000009001;
 ok(!defined($peer->parser), 'Non-connected peers have no parser');
-ok(!defined($peer->api), '... not an API');
+ok(!defined($peer->api),    '... not an API');
 
 lives_ok sub {
   $peer->parser([sub { }]);
-  },
-  'Set parser ok';
+}, 'Set parser ok';
 ok(defined($peer->parser), '... correct, it has parser now');
 lives_ok sub { $peer->clear_parser }, 'Clear parser ok';
 ok(!defined($peer->parser), '... and the parser is gone again');
@@ -122,7 +122,8 @@ my ($channel1, $channel2);
 lives_ok sub { $channel1 = $peer->open_channel }, 'Created a channel';
 isa_ok($channel1, 'Protocol::AMQP::Channel',
   'Got a valid channel with id ' . $channel1->channel);
-is($peer->get_channel($channel1->channel), $channel1, 'Same object returned for the channel id');
+is($peer->get_channel($channel1->channel),
+  $channel1, 'Same object returned for the channel id');
 
 lives_ok sub { $channel2 = $peer->open_channel }, 'Created another channel';
 isa_ok($channel2, 'Protocol::AMQP::Channel',
@@ -164,7 +165,8 @@ lives_ok sub { $closed = $peer->close_channel($channel2->channel) },
   'Closing an already closed channel does nothing';
 ok(!defined($closed), '... returns false');
 
-ok(!defined($peer->get_channel($channel1->channel)), 'Returned undef for missing channels');
+ok(!defined($peer->get_channel($channel1->channel)),
+  'Returned undef for missing channels');
 
 
 done_testing();

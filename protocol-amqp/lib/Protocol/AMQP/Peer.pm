@@ -42,7 +42,7 @@ has 'api' => (
 
 
 with 'Protocol::AMQP::Roles::UserCallbacks',
-     'Protocol::AMQP::Roles::SendMethod';
+  'Protocol::AMQP::Roles::SendMethod';
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
@@ -69,11 +69,9 @@ sub cleanup {
   trace('Calling on_disconnect_cb');
   $self->user_on_disconnect_cb;
 
-  trace('Connection is closed, cleanup Peer');
+  trace('Clean out slots');
   $self->clear_parser;
   $self->clear_api;
-
-  trace('Close channel 0');
   $self->close_channel($self);
 
   return;
@@ -92,7 +90,7 @@ sub handle_method {
 sub get_channel {
   my ($self, $id) = @_;
   my $channels = $self->channels;
-  
+
   return unless exists $channels->[$id];
   return $channels->[$id];
 }
@@ -188,10 +186,11 @@ sub _send_protocol_header {
   my $protocol_header =
     pack('a* C CCC', "AMQP", 0, $v->{major}, $v->{minor}, $v->{revision});
   trace('header is ', \$protocol_header, ' for version ', $v);
-
   $self->write($protocol_header);
+
   $self->api($v->{api}->new({peer => $self}));
   $self->parser([\&_parse_protocol_header]);
+
   return;
 }
 
@@ -221,9 +220,9 @@ sub _parse_protocol_header {
 sub _send_frame {
   my ($self, $type, $chan, $payload) = @_;
   my $size = length($payload);
-  
+
   trace("Sending frame type $type over chan $chan, payload size $size");
-  
+
   $self->write(pack('CnN', $type, $chan, $size) . $payload . chr(0xCE));
 }
 
