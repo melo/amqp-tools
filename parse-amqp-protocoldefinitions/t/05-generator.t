@@ -48,6 +48,21 @@ for my $class (values %{$amqp->classes}) {
 }
 
 
+$tmpdir = $tmpdir->subdir('all');
+$tmpdir->mkpath;
+lives_ok sub { $amqp->generate_all_files('xpto', $tmpdir) },
+  'Generate all files with a single pass';
+
+$class_pm = $tmpdir->file($amqp->package_filename)->slurp;
+test_version_file_content($class_pm);
+
+$tmpdir = $tmpdir->subdir($amqp->package_basename);
+for my $class (values %{$amqp->classes}) {
+  $class_pm = $tmpdir->file($class->package_filename)->slurp;
+  test_class_file_content($class, $class_pm);
+}
+
+
 done_testing();
 
 

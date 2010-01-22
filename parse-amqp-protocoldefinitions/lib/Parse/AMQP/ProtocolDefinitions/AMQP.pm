@@ -86,6 +86,23 @@ sub extract_from {
 
 ###################################
 
+sub generate_all_files {
+  my $self   = shift;
+  my $prefix = shift;
+  my $dir    = dir(@_);
+
+  $self->generate($prefix, $dir);
+
+  $dir = $dir->subdir($self->package_basename);
+  $dir->mkpath;
+
+  for my $class (values %{$self->classes}) {
+    $class->generate($prefix, $dir);
+  }
+
+  return;
+}
+
 sub generate {
   my $self   = shift;
   my $prefix = shift;

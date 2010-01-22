@@ -4,4 +4,4 @@ use strict;
 use warnings;
 use Parse::AMQP::ProtocolDefinitions;
 
-Parse::AMQP::ProtocolDefinitions->load(shift)->generate(shift);
+Parse::AMQP::ProtocolDefinitions->load(shift)->generate_all_files(@ARGV);
