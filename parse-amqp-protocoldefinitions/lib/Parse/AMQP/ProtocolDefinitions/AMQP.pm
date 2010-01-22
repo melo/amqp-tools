@@ -91,9 +91,7 @@ sub generate {
   my $prefix = shift;
   my $dir    = dir(@_);
 
-  my $version = $self->basename_for_version;
-
-  my $fh = $dir->file("$version.pm")->openw;
+  my $fh = $dir->file($self->package_filename)->openw;
   $fh->print($self->build_version_class($prefix));
   $fh->close;
 
@@ -103,12 +101,12 @@ sub generate {
 sub build_version_class {
   my ($self, $prefix) = @_;
 
-  my $version = $self->basename_for_version;
   my ($major, $minor, $rev) = ($self->major, $self->minor, $self->revision);
+  my $package = $self->package($prefix);
 
   ## Start the package
   my $buf = <<EOH;
-package ${prefix}::${version};
+package $package;
 
 use Moose;
 extends 'Protocol::AMQP::API::Version';
@@ -121,7 +119,7 @@ Protocol::AMQP::Registry->register_version(
     minor    => $minor,
     revision => $rev,
 
-    api => '${prefix}::${version}',
+    api => '$package',
   }
 );
 
@@ -130,7 +128,7 @@ EOH
 
   my $classes = $self->classes;
   for my $class (sort { $a->index <=> $b->index } values %$classes) {
-    $buf .= $class->build_class_slot("${prefix}::$version");
+    $buf .= $class->build_class_slot($package);
   }
 
   ## End the package
@@ -141,11 +139,16 @@ EOH
   return $buf;
 }
 
-sub basename_for_version {
+sub package_basename {
   my ($self) = @_;
 
   return
     sprintf('V%0.3d%0.3d%0.3d', $self->major, $self->minor, $self->revision);
+}
+
+sub package {
+  my $self = shift;
+  return join('::', @_, $self->package_basename);
 }
 
 1;

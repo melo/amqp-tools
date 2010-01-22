@@ -45,6 +45,22 @@ sub _build_sys {
   return $sys;
 }
 
+###################################
+
+sub package_basename {
+  return ucfirst(shift->name);
+}
+
+sub package_filename {
+  return shift->package_basename.'.pm';
+}
+
+sub package {
+  my $self = shift;
+  return join('::', $self->parent->package, $self->package_basename);
+}
+
+
 ##############################
 
 sub valid_attrs { }

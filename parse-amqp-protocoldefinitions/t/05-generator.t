@@ -16,8 +16,13 @@ my $amqp;
 lives_ok
   sub { $amqp = Parse::AMQP::ProtocolDefinitions->load($specs[0]{path}) };
 
-is($amqp->basename_for_version, 'V000009001',
+is($amqp->package_basename, 'V000009001',
   'Proper basename for version 0.9.1');
+is($amqp->package_filename, 'V000009001.pm',
+  'Proper filename for version 0.9.1');
+is($amqp->package('xpto'),
+  'xpto::V000009001', 'Proper package with xpto prefix for version 0.9.1');
+
 
 my $class_pm;
 lives_ok sub { $class_pm = $amqp->build_version_class('xpto') },
@@ -25,9 +30,9 @@ lives_ok sub { $class_pm = $amqp->build_version_class('xpto') },
 test_class_file_content($class_pm);
 
 my $tmpdir = dir(tempdir(CLEANUP => 1));
+$class_pm = $tmpdir->file($amqp->package_filename)->slurp;
 lives_ok sub { $amqp->generate('xpto', "$tmpdir") },
   'Wrote package file to disk';
-$class_pm = $tmpdir->file($amqp->basename_for_version . '.pm')->slurp;
 test_class_file_content($class_pm);
 
 done_testing();
