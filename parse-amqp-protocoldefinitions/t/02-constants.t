@@ -28,7 +28,8 @@ SPEC: for my $spec (@specs) {
   is($c->value, '501');
   is($c->class, 'hard-error');
   like($c->doc,
-    qr/(sender|client) sent a malformed frame that the (recipient|server) could not decode/);
+    qr/(sender|client) sent a malformed frame that the (recipient|server) could not decode/
+  );
   is($c->parent, $amqp, "... not parentless, I like having a father");
   is(
     $c->sys,

@@ -9,19 +9,19 @@ enum 'AssertCheck', qw( notnull length regexp le ne syntax null );
 
 has check => (
   isa => 'AssertCheck',
-  is  => 'rw',  
+  is  => 'rw',
 );
 
 ## For 'length' and 'regexp', value
 has value => (
   isa => 'Str',
-  is  => 'rw',  
+  is  => 'rw',
 );
 
 ## For 'le', method and field
 has method => (
   isa => 'Str',
-  is  => 'rw',  
+  is  => 'rw',
 );
 
 has field => (

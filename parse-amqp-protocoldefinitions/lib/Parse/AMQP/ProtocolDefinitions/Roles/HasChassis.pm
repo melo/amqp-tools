@@ -12,7 +12,11 @@ has chassis => (
 after extract_from => sub {
   my ($self, $elem) = @_;
 
-  $self->chassis(Parse::AMQP::ProtocolDefinitions::Chassis->parse_all($elem, parent => $self));
+  $self->chassis(
+    Parse::AMQP::ProtocolDefinitions::Chassis->parse_all(
+      $elem, parent => $self
+    )
+  );
 };
 
 no Moose::Role;

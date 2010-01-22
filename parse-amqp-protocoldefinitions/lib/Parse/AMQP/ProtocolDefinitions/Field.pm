@@ -6,12 +6,12 @@ extends 'Parse::AMQP::ProtocolDefinitions::Base';
 
 has domain => (
   isa => 'Str',
-  is  => 'rw',  
+  is  => 'rw',
 );
 
 has label => (
   isa => 'Str',
-  is  => 'rw',  
+  is  => 'rw',
 );
 
 has reserved => (
@@ -23,7 +23,7 @@ has reserved => (
 ## deprecated fields
 has type => (
   isa => 'Str',
-  is  => 'rw',  
+  is  => 'rw',
 );
 
 with

@@ -62,6 +62,7 @@ SPEC: for my $spec (@specs) {
   ok(@$as);
   is($as->[0]->check, 'length');
   is($as->[0]->value, '127');
+
   if (($spec->{version} gt '000009000')) {
     is($as->[1]->check, 'regexp');
     is($as->[1]->value, '^[a-zA-Z0-9-_.:]*$');

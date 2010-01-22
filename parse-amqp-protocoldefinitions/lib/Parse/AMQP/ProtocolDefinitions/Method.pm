@@ -61,7 +61,10 @@ sub extract_from {
   my ($self, $elem) = @_;
 
   $self->responses(
-    Parse::AMQP::ProtocolDefinitions::Response->parse_all($elem, parent => $self));
+    Parse::AMQP::ProtocolDefinitions::Response->parse_all(
+      $elem, parent => $self
+    )
+  );
 }
 
 

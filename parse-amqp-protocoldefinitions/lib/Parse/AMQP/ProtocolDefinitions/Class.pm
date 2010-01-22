@@ -49,7 +49,11 @@ sub valid_attrs {qw(handler index label)}
 sub extract_from {
   my ($self, $elem) = @_;
 
-  $self->methods(Parse::AMQP::ProtocolDefinitions::Method->parse_all($elem, parent => $self));
+  $self->methods(
+    Parse::AMQP::ProtocolDefinitions::Method->parse_all(
+      $elem, parent => $self
+    )
+  );
 }
 
 1;

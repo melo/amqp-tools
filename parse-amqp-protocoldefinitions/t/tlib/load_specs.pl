@@ -39,8 +39,8 @@ sub load_specs {
 
     $spec->{path} = $path;
   }
-  
-  return grep { $_->{path} && ! $_->{skip} } @specs;
+
+  return grep { $_->{path} && !$_->{skip} } @specs;
 }
 
 1;
