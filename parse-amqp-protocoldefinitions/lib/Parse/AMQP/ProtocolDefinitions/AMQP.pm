@@ -4,6 +4,7 @@ use Moose;
 use Parse::AMQP::ProtocolDefinitions::Class;
 use Parse::AMQP::ProtocolDefinitions::Constant;
 use Parse::AMQP::ProtocolDefinitions::Domain;
+use Path::Class qw( dir );
 
 extends 'Parse::AMQP::ProtocolDefinitions::Base';
 
@@ -80,6 +81,71 @@ sub extract_from {
       $elem, parent => $self
     )
   );
+}
+
+
+###################################
+
+sub generate {
+  my $self   = shift;
+  my $prefix = shift;
+  my $dir    = dir(@_);
+
+  my $version = $self->basename_for_version;
+
+  my $fh = $dir->file("$version.pm")->openw;
+  $fh->print($self->build_version_class($prefix));
+  $fh->close;
+
+  return;
+}
+
+sub build_version_class {
+  my ($self, $prefix) = @_;
+
+  my $version = $self->basename_for_version;
+  my ($major, $minor, $rev) = ($self->major, $self->minor, $self->revision);
+
+  ## Start the package
+  my $buf = <<EOH;
+package ${prefix}::${version};
+
+use Moose;
+extends 'Protocol::AMQP::API::Version';
+
+## My version registration
+use Protocol::AMQP::Registry;
+
+Protocol::AMQP::Registry->register_version(
+  { major    => $major,
+    minor    => $minor,
+    revision => $rev,
+
+    api => '${prefix}::${version}',
+  }
+);
+
+## My API classes
+EOH
+
+  my $classes = $self->classes;
+  for my $class (sort { $a->index <=> $b->index } values %$classes) {
+    $buf .= $class->build_class_slot("${prefix}::$version");
+  }
+
+  ## End the package
+  $buf .= "1;\n";
+
+  # TODO: generate POD
+
+  return $buf;
+}
+
+sub basename_for_version {
+  my ($self) = @_;
+
+  return
+    sprintf('V%0.3d%0.3d%0.3d', $self->major, $self->minor, $self->revision);
 }
 
 1;

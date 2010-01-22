@@ -10,6 +10,8 @@ Test::More::plan skip_all =>
   unless $ENV{AMQP_PROTO_DEFS_DIR};
 
 sub load_specs {
+  my ($version) = @_;
+
   my @specs = (
     { name        => 'amqp-0.9.0',
       version     => '000009000',
@@ -40,7 +42,9 @@ sub load_specs {
     $spec->{path} = $path;
   }
 
-  return grep { $_->{path} && !$_->{skip} } @specs;
+  return grep {
+    $_->{path} && !$_->{skip} && (!$version || $version eq $_->{version})
+  } @specs;
 }
 
 1;

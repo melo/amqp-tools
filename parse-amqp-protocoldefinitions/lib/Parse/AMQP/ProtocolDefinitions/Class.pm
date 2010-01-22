@@ -56,4 +56,30 @@ sub extract_from {
   );
 }
 
+
+###################################
+
+sub build_class_slot {
+  my ($self, $prefix) = @_;
+  my $name = $self->name;
+  my $package = join('::', ${prefix}, ucfirst($name));
+  
+  return <<EOS;
+use $package;
+
+has '$name' => (
+  isa        => '$package',
+  is         => 'ro',
+  lazy_build => 1,
+);
+
+sub _build_$name {
+  return $package->new({peer => \$_[0]->peer});
+}
+
+
+EOS
+}
+
+
 1;
