@@ -27,6 +27,24 @@ Protocol::AMQP::Registry->register_method(
   ],
 );
 
+## Connection.Tune
+Protocol::AMQP::Registry->register_method(
+  10, 30,
+  [ 10, 30, 'connection_tune',
+    [qw( channel_max frame_max heartbeat )],
+    'n N n',
+  ],
+);
+
+## Connection.Tune_Ok
+Protocol::AMQP::Registry->register_method(
+  10, 31,
+  [ 10, 31, 'connection_tune_ok',
+    [qw( channel_max frame_max heartbeat )],
+    'n N n',
+  ],
+);
+
 
 ##################################
 
@@ -38,5 +56,12 @@ sub start_ok {
   return shift->{peer}->send_method('connection_start_ok', @_);
 }
 
+sub tune {
+  return shift->{peer}->send_method('connection_tune', @_);
+}
+
+sub tune_ok {
+  return shift->{peer}->send_method('connection_tune_ok', @_);
+}
 
 1;
