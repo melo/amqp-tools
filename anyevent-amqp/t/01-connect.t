@@ -22,7 +22,7 @@ leakguard {
 
   $cln->connect;
   $result = $cv->recv;
-} on_leak => 'die';
+};
 
 is $result, 'done', 'expected result';
 
@@ -36,7 +36,7 @@ leakguard {
 
   $cln->connect;
   $result = $cv->recv;
-} on_leak => 'die';
+};
 
 is $result, 'done', 'expected result';
 
