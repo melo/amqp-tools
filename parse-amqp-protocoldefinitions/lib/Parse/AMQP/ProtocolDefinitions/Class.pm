@@ -2,6 +2,7 @@ package Parse::AMQP::ProtocolDefinitions::Class;
 
 use Moose;
 use Parse::AMQP::ProtocolDefinitions::Method;
+use Path::Class qw( dir );
 
 extends 'Parse::AMQP::ProtocolDefinitions::Base';
 
@@ -59,6 +60,20 @@ sub extract_from {
 
 ###################################
 
+sub generate {
+  my $self   = shift;
+  my $prefix = shift;
+  my $dir    = dir(@_);
+
+  my $class = ucfirst($self->name);
+
+  my $fh = $dir->file("$class.pm")->openw;
+  $fh->print($self->build_class_class($prefix));
+  $fh->close;
+
+  return;
+}
+
 sub build_class_slot {
   my ($self, $prefix) = @_;
   my $name = $self->name;
@@ -79,6 +94,35 @@ sub _build_$name {
 
 
 EOS
+}
+
+sub build_class_class {
+  my ($self, $prefix) = @_;
+  my $package = $self->package;
+
+  ## Start the package
+  my $buf = <<EOH;
+package $package;
+
+use Moose;
+use Protocol::AMQP::Registry;
+
+extends 'Protocol::AMQP::API::Class';
+
+
+EOH
+
+  # my $classes = $self->classes;
+  # for my $class (sort { $a->index <=> $b->index } values %$classes) {
+  #   $buf .= $class->build_class_slot("${prefix}::$name");
+  # }
+
+  ## End the package
+  $buf .= "1;\n";
+
+  # TODO: generate POD
+
+  return $buf;
 }
 
 

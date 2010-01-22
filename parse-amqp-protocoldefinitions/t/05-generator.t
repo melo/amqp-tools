@@ -26,19 +26,33 @@ is($amqp->package('xpto'),
 
 my $class_pm;
 lives_ok sub { $class_pm = $amqp->build_version_class('xpto') },
-  'Generated class file ok';
-test_class_file_content($class_pm);
+  'Generated version class file ok';
+test_version_file_content($class_pm);
 
 my $tmpdir = dir(tempdir(CLEANUP => 1));
+lives_ok sub { $amqp->generate('xpto', $tmpdir) },
+  'Wrote version package file to disk';
 $class_pm = $tmpdir->file($amqp->package_filename)->slurp;
-lives_ok sub { $amqp->generate('xpto', "$tmpdir") },
-  'Wrote package file to disk';
-test_class_file_content($class_pm);
+test_version_file_content($class_pm);
+
+
+for my $class (values %{$amqp->classes}) {
+  lives_ok sub { $class_pm = $class->build_class_class('xpto') },
+    'Generated class class file ok';
+  test_class_file_content($class, $class_pm);
+
+  lives_ok sub { $class->generate('xpto', $tmpdir) },
+    'Wrote class package file to disk';
+  $class_pm = $tmpdir->file($class->package_filename)->slurp;
+  test_class_file_content($class, $class_pm);
+}
+
 
 done_testing();
 
 
-sub test_class_file_content {
+###################################
+sub test_version_file_content {
   my ($class_pm) = @_;
 
   like($class_pm, qr/^package xpto::V000009001/m, '... package name ok');
@@ -88,3 +102,19 @@ sub test_class_file_content {
   }
 }
 
+sub test_class_file_content {
+  my ($class, $class_pm) = @_;
+  my $package = $class->package('xpto');
+
+  like($class_pm, qr/^package $package;/m, "Test package $package");
+  like(
+    $class_pm,
+    qr/^use Protocol::AMQP::Registry;/m,
+    "... make sure we use our registry class"
+  );
+  like(
+    $class_pm,
+    qr/^extends 'Protocol::AMQP::API::Class';/m,
+    '... extends the proper class'
+  );
+}
