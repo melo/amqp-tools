@@ -32,6 +32,8 @@ sub handle_method {
         heartbeat   => $data->{heartbeat},
       }
     );
+
+    $self->user_on_connect_cb();
   }
 }
 

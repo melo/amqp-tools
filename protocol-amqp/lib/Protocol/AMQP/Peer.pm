@@ -154,10 +154,6 @@ sub _on_connect_ok {
   $self->open_channel($self);
   $self->_send_protocol_header;
 
-  ## FIXME: this is too soon, it should be after the Connection.Tune_Ok
-  ## Only temporary to make sure our tests end properly
-  $self->user_on_connect_cb();
-
   return;
 }
 
