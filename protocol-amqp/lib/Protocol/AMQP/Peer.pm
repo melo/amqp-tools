@@ -56,9 +56,11 @@ sub close   { confess("Implement close() on " . ref($_[0]) . ", ") }
 
 sub error {
   my $self = shift;
+  my ($error) = @_;
   trace("AMQP error: ", \@_);
 
   $self->close(@_);
+  $self->cleanup if $error && $error eq 'eof';
 
   return;
 }
