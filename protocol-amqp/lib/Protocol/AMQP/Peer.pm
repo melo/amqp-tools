@@ -50,9 +50,13 @@ __PACKAGE__->meta->make_immutable;
 
 ##################################
 
-sub connect { confess("Implement connect()  on " . ref($_[0]) . ", ") }
-sub write   { confess("Implement write() on " . ref($_[0]) . ", ") }
-sub close   { confess("Implement close() on " . ref($_[0]) . ", ") }
+sub connect       { confess("Implement connect()  on " . ref($_[0]) . ", ") }
+sub write         { confess("Implement write() on " . ref($_[0]) . ", ") }
+sub close         { confess("Implement close() on " . ref($_[0]) . ", ") }
+sub handle_method { confess 'Implement handle_method() on ' . (ref($_[0]) || $_[0]) . ', ' }
+
+
+###################################
 
 sub error {
   my $self = shift;
@@ -79,11 +83,11 @@ sub cleanup {
   return;
 }
 
+sub conn_exception {
+  my ($self) = @_;
+  ## TODO: send connection exception here...
 
-##################################
-
-sub handle_method {
-  confess 'Implement handle_method() on ' . (ref($_[0]) || $_[0]) . ', ';
+  $self->close;
 }
 
 
@@ -133,16 +137,6 @@ sub _find_unused_channel_id {
 
   # TODO: test for max channel limit
   return $id;
-}
-
-
-##################################
-
-sub conn_exception {
-  my ($self) = @_;
-  ## TODO: send connection exception here...
-
-  $self->close;
 }
 
 
