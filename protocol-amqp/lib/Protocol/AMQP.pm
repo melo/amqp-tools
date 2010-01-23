@@ -33,19 +33,23 @@ All the protocol negotiation, framing, and method dispatching logic is
 implemented inside, but we don't provide a networking core.
 
 This allows you to write several implementations, some using
-asynchronous modules like L<AnyEvent>, L<POE>, or even L<Danga::Socket>,
-and others using more classical synchronous methods.
+asynchronous modules like L<AnyEvent|AnyEvent>, L<POE|POE>, or even
+L<Danga::Socket|Danga::Socket>, and others using more classical
+synchronous methods.
 
-In this document we will map all the classes under the L<Protocol::AMQP>
-namespace and provide short descriptions of what each one does, and how
-it should be used. Think of this as a table of contents, from where you
-can jump to any particular chapter.
+In this document we will map all the classes under the
+L<Protocol::AMQP|Protocol::AMQP> namespace and provide short
+descriptions of what each one does, and how it should be used. Think
+of this as a table of contents, from where you can jump to any
+particular chapter.
 
 
 =head1 HELPER CLASSES
 
-There are three helper classes: L<Protocol::AMQP::Registry>,
-L<Protocol::AMQP::Util> and L<Protocol::AMQP::Constants>.
+There are three helper classes:
+L<Protocol::AMQP::Registry|Protocol::AMQP::Registry>,
+L<Protocol::AMQP::Util|Protocol::AMQP::Util> and
+L<Protocol::AMQP::Constants|Protocol::AMQP::Constants>.
 
 
 =head2 Protocol::AMQP::Registry
@@ -61,23 +65,24 @@ we deal with:
 
 =item protocol versions
 
-L<Protocol::AMQP> supports several AMQP versions. Right now we are
-working with 0.9.1, but we expect to ship with support for 0.8.0, 0.9.0,
-and 0.9.1.
+L<Protocol::AMQP|Protocol::AMQP> supports several AMQP versions. Right
+now we are working with 0.9.1, but we expect to ship with support for
+0.8.0, 0.9.0, and 0.9.1.
 
 We also plan on supporting 0.10.0 as soon as it is available.
 
 To keep track of which versions we know about (each client must decide
 which versions to use dynamically), and to provide protocol version
-negotiation, the L<Protocol::AMQP::Registry> provides an API to register
-loaded versions of the AMQP protocol.
+negotiation, the L<Protocol::AMQP::Registry|Protocol::AMQP::Registry>
+provides an API to register loaded versions of the AMQP protocol.
 
 =item frame types
 
 The AMQP protocol is based on frames and there are several types of
 frames (right now the protocol defines 4 types).
 
-L<Protocol::AMQP::Registry> keeps track of the known types.
+L<Protocol::AMQP::Registry|Protocol::AMQP::Registry> keeps track of the
+known types.
 
 =item methods
 
@@ -105,7 +110,7 @@ A set of important constants for the AMQP protocol.
 
 =head1 SEE ALSO
 
-L<AnyEvent::AMQP>
+L<AnyEvent::AMQP|AnyEvent::AMQP>
 
 
 =head1 AUTHOR
