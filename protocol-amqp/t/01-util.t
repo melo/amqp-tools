@@ -17,46 +17,51 @@ use Protocol::AMQP::Util qw(
 ##################################
 
 ## place trace call here, so that line number don't change after each file modification
+$ENV{PROTOCOL_AMQP_TRACE} = 1;
 my $trace_call = sub {
   my $buffer;
   trace(\$buffer, @_);
   return $buffer;
 };
 
+my $buffer;
 my $small_buf = 'a' x 20;
 my $big_buf   = 'A' x 60;
 
 my @trace_test_cases = (
   'basic' => {
     input  => ['olas'],
-    output => "# [Test::Exception::lives_ok:50] olas\n",
+    output => "# [main::__ANON__:23] olas\n",
   },
 
   complex => {
     input  => ['good good', {a => 1}, ' and ', \$small_buf],
-    output => qq{# [Test::Exception::lives_ok:50] good good{ a => 1 } and \\"aaaaaaaaaaaaaaaaaaaa" (len 20)\n},
+    output => qq{# [main::__ANON__:23] good good{ a => 1 } and \\"aaaaaaaaaaaaaaaaaaaa" (len 20)\n},
   },
 
   big => {
     input  => ['oh my, so... ', \$big_buf],
-    output => qq{# [Test::Exception::lives_ok:50] oh my, so... \\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA..." (len 60)\n},
+    output => qq{# [main::__ANON__:23] oh my, so... \\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA..." (len 60)\n},
   },
 );
 
 while (@trace_test_cases) {
   my ($name, $spec) = splice(@trace_test_cases, 0, 2);
-  my $buffer;
   
-  lives_ok sub { trace(\$buffer, @{$spec->{input}}) };
+  lives_ok sub { $buffer = $trace_call->(@{$spec->{input}}) };
   is($buffer, $spec->{output});
 }
 
 my $hashref = {a => 1};
-my $buffer;
-lives_ok sub { trace(\$buffer, $hashref) },
+lives_ok sub { $buffer = $trace_call->($hashref) },
   'trace() will not die while testing for argument respect';
 is(ref($hashref), 'HASH', '... and afterwards, our $hashref is still a HASH');
 cmp_deeply($hashref, {a => 1}, '... and with the proper content');
+
+$ENV{PROTOCOL_AMQP_TRACE} = 0;
+ok(!defined($trace_call->('yoo')), 'Trace disabled ok (PROTOCOL_AMQP_TRACE is false)');
+delete $ENV{PROTOCOL_AMQP_TRACE};
+ok(!defined($trace_call->('yoo')), 'Trace disabled ok (PROTOCOL_AMQP_TRACE is non-existent)');
 
 
 ##################################

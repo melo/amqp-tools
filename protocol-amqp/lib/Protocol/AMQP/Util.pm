@@ -193,6 +193,8 @@ sub unpack_method {
 use Data::Dump ();
 
 sub trace {
+  return unless $ENV{PROTOCOL_AMQP_TRACE};
+
   my ($line) = (caller(0))[2];
   my ($sub)  = (caller(1))[3];
   $sub =~ s/^Protocol::AMQP:://;
